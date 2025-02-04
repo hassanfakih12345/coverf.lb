@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-key="shopping_cart">السلة - مودا</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <a href="index.html" class="brand">
+            <img src="https://i.imgur.com/AjS0DYI.png" alt="شعار المتجر" class="site-logo">
+        </a>
+        
+        <nav>
+            <a href="index.html" data-key="products">المجموعات</a>
+            <a href="cart.html" data-key="cart">السلة</a>
+            <a href="#contact" data-key="contact">اتصل بنا</a>
+        </nav>
+
+        <div class="header-actions">
+            <div class="language-switcher">
+                <button id="englishBtn">EN</button>
+                <button id="arabicBtn" class="active">AR</button>
+            </div>
+            <div class="cart-icon" onclick="goToCart()">
+                🛍️
+                <span id="cartCount">0</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="cart-container">
+        <h1 class="section-title" data-key="shopping_cart">سلة التسوق</h1>
+        <div class="cart-wrapper">
+            <ul id="cartItems" class="cart-items"></ul>
+            <div class="cart-summary">
+                <h3 data-key="order_summary">ملخص الطلب</h3>
+                <div class="summary-item">
+                    <span data-key="total">المجموع:</span>
+                    <span id="totalAmount">0 ريال</span>
+                </div>
+                <div class="cart-actions">
+                    <button id="clearCart" class="secondary-btn" data-key="clear_cart">إفراغ السلة</button>
+                    <button id="sendToWhatsApp" class="primary-btn" data-key="checkout_whatsapp">إتمام الشراء عبر واتساب</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
