@@ -519,14 +519,137 @@ function handleFormSubmit(e) {
   // Get phone information
   const phoneData = window.selectedPhoneData || { name: 'Unknown Phone', specs: 'Unknown' };
   
-  // Create WhatsApp message
-  const message = createWhatsAppMessage(customerName, customerPhone, customerAddress, phoneData);
+  // Get the user image
+  const userImage = document.getElementById('user-image');
   
-  // Send to WhatsApp
-  sendToWhatsApp(message);
+  // Show loading state
+  const sendBtn = e.target.querySelector('.btn-send');
+  const originalText = sendBtn.innerHTML;
+  sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+  sendBtn.disabled = true;
+  
+  // Create WhatsApp message with image
+  createWhatsAppMessageWithImage(customerName, customerPhone, customerAddress, phoneData, userImage)
+    .then(message => {
+      // Send to WhatsApp
+      sendToWhatsApp(message);
+      
+      // Reset button
+      sendBtn.innerHTML = originalText;
+      sendBtn.disabled = false;
+    })
+    .catch(error => {
+      console.error('Error creating message:', error);
+      
+      // Fallback to text-only message
+      const message = createWhatsAppMessage(customerName, customerPhone, customerAddress, phoneData);
+      sendToWhatsApp(message);
+      
+      // Reset button
+      sendBtn.innerHTML = originalText;
+      sendBtn.disabled = false;
+    });
 }
 
-// Create WhatsApp message
+// Create WhatsApp message with image
+function createWhatsAppMessageWithImage(name, phone, address, phoneData, userImage) {
+  return new Promise((resolve, reject) => {
+    // Check if image exists and has src
+    if (!userImage || !userImage.src || userImage.src === '') {
+      // Fallback to text-only message
+      const message = createWhatsAppMessage(name, phone, address, phoneData);
+      resolve(message);
+      return;
+    }
+    
+    // Create canvas to capture the design
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    // Set canvas size to match container
+    const container = document.getElementById('cover-container');
+    canvas.width = container.offsetWidth;
+    canvas.height = container.offsetHeight;
+    
+    // Load both user image and phone template
+    const tempImg = new Image();
+    const templateImg = new Image();
+    tempImg.crossOrigin = 'anonymous';
+    templateImg.crossOrigin = 'anonymous';
+    
+    let imagesLoaded = 0;
+    const totalImages = 2;
+    
+    function onImageLoad() {
+      imagesLoaded++;
+      if (imagesLoaded === totalImages) {
+        try {
+          // Draw background
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          
+          // Draw phone template first (as background)
+          ctx.drawImage(templateImg, 0, 0, canvas.width, canvas.height);
+          
+          // Calculate image position and size
+          const imgX = offsetX + (container.offsetWidth / 2);
+          const imgY = offsetY + (container.offsetHeight / 2);
+          
+          // Save current context
+          ctx.save();
+          
+          // Apply transformations
+          ctx.translate(imgX, imgY);
+          ctx.rotate(rotation * Math.PI / 180);
+          ctx.scale(scale, scale);
+          
+          // Draw the user image
+          ctx.drawImage(tempImg, -userImage.offsetWidth/2, -userImage.offsetHeight/2, userImage.offsetWidth, userImage.offsetHeight);
+          
+          // Restore context
+          ctx.restore();
+          
+          // Convert canvas to base64
+          const imageData = canvas.toDataURL('image/png', 0.9);
+          
+          // Create message with image
+          const message = createWhatsAppMessage(name, phone, address, phoneData);
+          
+          // Store image data for later use
+          window.orderImageData = imageData;
+          
+          resolve(message);
+        } catch (error) {
+          console.error('Error creating image:', error);
+          // Fallback to text-only message
+          const message = createWhatsAppMessage(name, phone, address, phoneData);
+          resolve(message);
+        }
+      }
+    }
+    
+    tempImg.onload = onImageLoad;
+    templateImg.onload = onImageLoad;
+    
+    tempImg.onerror = () => {
+      console.error('Error loading user image');
+      // Continue with template only
+      onImageLoad();
+    };
+    
+    templateImg.onerror = () => {
+      console.error('Error loading template image');
+      // Continue with user image only
+      onImageLoad();
+    };
+    
+    // Set image sources
+    tempImg.src = userImage.src;
+    templateImg.src = document.getElementById('template').src;
+  });
+}
+
+// Create WhatsApp message (text only)
 function createWhatsAppMessage(name, phone, address, phoneData) {
   const message = `*COVERF.LB - New Order* 📱
 
@@ -552,13 +675,45 @@ function createWhatsAppMessage(name, phone, address, phoneData) {
 // Send to WhatsApp
 function sendToWhatsApp(message) {
   const whatsappNumber = '+243998189909';
-  const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${message}`;
   
-  // Open WhatsApp in new tab
-  window.open(whatsappUrl, '_blank');
+  // Check if we have image data
+  if (window.orderImageData) {
+    // Create a download link for the image
+    createImageDownload();
+    
+    // Add image note to message
+    const imageNote = `\n\n📸 *Design Image:* The design image has been automatically saved to your device as "coverf-design-[timestamp].png"`;
+    const fullMessage = message + encodeURIComponent(imageNote);
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${fullMessage}`;
+    
+    // Open WhatsApp in new tab
+    window.open(whatsappUrl, '_blank');
+  } else {
+    // Send text-only message
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${message}`;
+    window.open(whatsappUrl, '_blank');
+  }
   
   // Show success message
   showSuccessMessage();
+}
+
+// Create image download
+function createImageDownload() {
+  if (!window.orderImageData) return;
+  
+  // Create download link
+  const link = document.createElement('a');
+  link.download = `coverf-design-${Date.now()}.png`;
+  link.href = window.orderImageData;
+  
+  // Trigger download
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  
+  // Clear stored image data
+  window.orderImageData = null;
 }
 
 // Show success message
@@ -566,10 +721,16 @@ function showSuccessMessage() {
   // Create success notification
   const notification = document.createElement('div');
   notification.className = 'success-notification';
+  
+  const hasImage = window.orderImageData !== null;
+  
   notification.innerHTML = `
     <div class="notification-content">
       <i class="fas fa-check-circle"></i>
-      <span>Order sent successfully to WhatsApp!</span>
+      <div>
+        <div>Order sent successfully to WhatsApp!</div>
+        ${hasImage ? '<div style="font-size: 12px; margin-top: 5px;">Design image has been saved to your device.</div>' : ''}
+      </div>
     </div>
   `;
   
