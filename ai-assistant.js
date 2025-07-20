@@ -10,6 +10,7 @@ class AIAssistant {
   init() {
     console.log('🤖 AI Assistant initialized for COVERF.LB');
     this.createAIPanel();
+    this.requestPermissions();
     this.startMonitoring();
   }
 
@@ -253,6 +254,54 @@ class AIAssistant {
     }
   }
 
+  // Request necessary permissions
+  requestPermissions() {
+    this.log('Requesting necessary permissions...', 'info');
+    
+    // Request clipboard permission
+    if (navigator.permissions && navigator.permissions.query) {
+      navigator.permissions.query({ name: 'clipboard-write' }).then(result => {
+        if (result.state === 'granted') {
+          this.log('Clipboard permission granted', 'success');
+        } else if (result.state === 'prompt') {
+          this.log('Requesting clipboard permission...', 'info');
+          // Try to write to clipboard to trigger permission request
+          navigator.clipboard.writeText('test').then(() => {
+            this.log('Clipboard permission granted', 'success');
+          }).catch(() => {
+            this.log('Clipboard permission denied', 'warning');
+          });
+        }
+      });
+    }
+
+    // Request camera permission (for future use)
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ video: false, audio: false })
+        .then(() => {
+          this.log('Camera permission granted', 'success');
+        })
+        .catch(() => {
+          this.log('Camera permission not needed or denied', 'info');
+        });
+    }
+
+    // Request notification permission
+    if ('Notification' in window) {
+      if (Notification.permission === 'default') {
+        Notification.requestPermission().then(permission => {
+          if (permission === 'granted') {
+            this.log('Notification permission granted', 'success');
+          } else {
+            this.log('Notification permission denied', 'warning');
+          }
+        });
+      } else if (Notification.permission === 'granted') {
+        this.log('Notification permission already granted', 'success');
+      }
+    }
+  }
+
   // Start monitoring system
   startMonitoring() {
     this.log('AI Assistant started monitoring system...', 'info');
@@ -281,16 +330,292 @@ class AIAssistant {
     return new Promise((resolve, reject) => {
       this.log('Starting smart ImgBB upload...', 'info');
       
-      // Check if API key is configured
-      if (!this.checkAPIKey()) {
-        this.log('API key not configured - using fallback method', 'warning');
+      // First, try to get API key or prompt user
+      this.ensureAPIKey().then(() => {
+        // Try multiple upload methods
+        this.tryMultipleUploadMethods(imageDataUrl, resolve, reject);
+      }).catch(error => {
+        this.log('Failed to get API key: ' + error.message, 'error');
         this.useFallbackUpload(imageDataUrl, resolve, reject);
+      });
+    });
+  }
+
+  // Ensure API Key is available
+  ensureAPIKey() {
+    return new Promise((resolve, reject) => {
+      const apiKey = this.getAPIKey();
+      
+      if (apiKey && apiKey !== 'YOUR_IMGBB_API_KEY') {
+        this.log('API key found and valid', 'success');
+        resolve(apiKey);
         return;
       }
 
-      // Try multiple upload methods
-      this.tryMultipleUploadMethods(imageDataUrl, resolve, reject);
+      this.log('API key not found, prompting user...', 'warning');
+      
+      // Create a modal to get API key
+      this.showAPIKeyModal().then(newApiKey => {
+        if (newApiKey && newApiKey.trim()) {
+          localStorage.setItem('imgbb_api_key', newApiKey.trim());
+          this.log('API key saved successfully', 'success');
+          resolve(newApiKey.trim());
+        } else {
+          reject(new Error('No API key provided'));
+        }
+      }).catch(error => {
+        reject(error);
+      });
     });
+  }
+
+  // Show API Key modal
+  showAPIKeyModal() {
+    return new Promise((resolve, reject) => {
+      // Create modal
+      const modal = document.createElement('div');
+      modal.id = 'api-key-modal';
+      modal.innerHTML = `
+        <div class="modal-overlay">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h3><i class="fas fa-key"></i> ImgBB API Key Required</h3>
+              <button class="modal-close" onclick="this.closest('#api-key-modal').remove()">×</button>
+            </div>
+            <div class="modal-body">
+              <p>To upload images to ImgBB, you need an API key.</p>
+              <div class="api-key-steps">
+                <div class="step">
+                  <span class="step-number">1</span>
+                  <span>Go to <a href="https://api.imgbb.com/" target="_blank">https://api.imgbb.com/</a></span>
+                </div>
+                <div class="step">
+                  <span class="step-number">2</span>
+                  <span>Sign up for a free account</span>
+                </div>
+                <div class="step">
+                  <span class="step-number">3</span>
+                  <span>Get your API key from the dashboard</span>
+                </div>
+                <div class="step">
+                  <span class="step-number">4</span>
+                  <span>Paste it below</span>
+                </div>
+              </div>
+              <div class="api-key-input">
+                <input type="text" id="api-key-input" placeholder="Enter your ImgBB API key here..." />
+                <button onclick="aiAssistant.submitAPIKey()" class="submit-btn">
+                  <i class="fas fa-check"></i> Submit
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Add modal styles
+      const style = document.createElement('style');
+      style.textContent = `
+        #api-key-modal {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          z-index: 20000;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .modal-overlay {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.8);
+          backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+          background: white;
+          border-radius: 15px;
+          padding: 0;
+          max-width: 500px;
+          width: 90%;
+          max-height: 80vh;
+          overflow-y: auto;
+          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+          animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+          from {
+            opacity: 0;
+            transform: translateY(-50px) scale(0.9);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+
+        .modal-header {
+          background: linear-gradient(45deg, #667eea, #764ba2);
+          color: white;
+          padding: 20px;
+          border-radius: 15px 15px 0 0;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .modal-header h3 {
+          margin: 0;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          font-size: 18px;
+        }
+
+        .modal-close {
+          background: none;
+          border: none;
+          color: white;
+          font-size: 24px;
+          cursor: pointer;
+          padding: 5px;
+          border-radius: 5px;
+          transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+          background: rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-body {
+          padding: 20px;
+        }
+
+        .modal-body p {
+          margin-bottom: 20px;
+          color: #4a5568;
+          line-height: 1.5;
+        }
+
+        .api-key-steps {
+          margin-bottom: 20px;
+        }
+
+        .step {
+          display: flex;
+          align-items: center;
+          gap: 15px;
+          margin-bottom: 10px;
+          padding: 10px;
+          background: #f7fafc;
+          border-radius: 8px;
+        }
+
+        .step-number {
+          background: linear-gradient(45deg, #667eea, #764ba2);
+          color: white;
+          width: 25px;
+          height: 25px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: bold;
+          font-size: 12px;
+        }
+
+        .step a {
+          color: #667eea;
+          text-decoration: none;
+          font-weight: 600;
+        }
+
+        .step a:hover {
+          text-decoration: underline;
+        }
+
+        .api-key-input {
+          display: flex;
+          gap: 10px;
+        }
+
+        .api-key-input input {
+          flex: 1;
+          padding: 12px 15px;
+          border: 2px solid #e2e8f0;
+          border-radius: 8px;
+          font-size: 14px;
+          transition: all 0.3s ease;
+        }
+
+        .api-key-input input:focus {
+          outline: none;
+          border-color: #667eea;
+          box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .submit-btn {
+          background: linear-gradient(45deg, #48bb78, #38a169);
+          color: white;
+          border: none;
+          padding: 12px 20px;
+          border-radius: 8px;
+          font-size: 14px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .submit-btn:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
+        }
+      `;
+      document.head.appendChild(style);
+
+      // Add to page
+      document.body.appendChild(modal);
+
+      // Store resolve/reject for later use
+      window.apiKeyModalResolve = resolve;
+      window.apiKeyModalReject = reject;
+
+      // Focus on input
+      setTimeout(() => {
+        const input = document.getElementById('api-key-input');
+        if (input) input.focus();
+      }, 100);
+    });
+  }
+
+  // Submit API Key
+  submitAPIKey() {
+    const input = document.getElementById('api-key-input');
+    const apiKey = input ? input.value.trim() : '';
+    
+    if (apiKey) {
+      if (window.apiKeyModalResolve) {
+        window.apiKeyModalResolve(apiKey);
+        window.apiKeyModalResolve = null;
+        window.apiKeyModalReject = null;
+      }
+      
+      // Remove modal
+      const modal = document.getElementById('api-key-modal');
+      if (modal) modal.remove();
+    } else {
+      alert('Please enter a valid API key');
+    }
   }
 
   // Check API Key
@@ -345,29 +670,55 @@ class AIAssistant {
   uploadToImgBB(imageDataUrl) {
     return new Promise((resolve, reject) => {
       const apiKey = this.getAPIKey();
-      const imageBlob = this.dataURLtoBlob(imageDataUrl);
+      this.log('Uploading to ImgBB with API key: ' + apiKey.substring(0, 10) + '...', 'info');
       
+      // Convert data URL to blob
+      const imageBlob = this.dataURLtoBlob(imageDataUrl);
+      this.log('Image blob created, size: ' + (imageBlob.size / 1024).toFixed(2) + ' KB', 'info');
+      
+      // Create FormData
       const formData = new FormData();
       formData.append('image', imageBlob, 'customer-image.jpg');
       
+      // Add additional parameters for better control
+      formData.append('name', 'COVERF.LB_Customer_Image');
+      formData.append('expiration', '2592000'); // 30 days
+      
+      this.log('Sending request to ImgBB...', 'info');
+      
+      // Make API request to ImgBB
       fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
         method: 'POST',
         body: formData
       })
       .then(response => {
+        this.log('ImgBB response status: ' + response.status, 'info');
+        
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
         return response.json();
       })
       .then(data => {
+        this.log('ImgBB response received', 'info');
+        
         if (data.success) {
-          resolve(data.data.url);
+          const imageUrl = data.data.url;
+          this.log('ImgBB upload successful! URL: ' + imageUrl, 'success');
+          
+          // Store additional info
+          localStorage.setItem('last_imgbb_url', imageUrl);
+          localStorage.setItem('last_imgbb_delete_url', data.data.delete_url);
+          
+          resolve(imageUrl);
         } else {
-          reject(new Error(data.error?.message || 'ImgBB upload failed'));
+          const errorMsg = data.error?.message || data.error || 'ImgBB upload failed';
+          this.log('ImgBB upload failed: ' + errorMsg, 'error');
+          reject(new Error(errorMsg));
         }
       })
       .catch(error => {
+        this.log('ImgBB upload error: ' + error.message, 'error');
         reject(error);
       });
     });
