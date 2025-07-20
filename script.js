@@ -290,20 +290,20 @@ handles.forEach((handle) => {
 });
 
 function startResize(e) {
-  e.stopPropagation(); // Prevent triggering drag
+    e.stopPropagation(); // Prevent triggering drag
   currentHandle = e.target;
-  startWidth = userImg.offsetWidth;
-  startHeight = userImg.offsetHeight;
+    startWidth = userImg.offsetWidth;
+    startHeight = userImg.offsetHeight;
   const coords = getClientCoordinates(e);
   startMouseX = coords.clientX;
   startMouseY = coords.clientY;
   startOffsetX = offsetX;
   startOffsetY = offsetY;
-  document.addEventListener("mousemove", resizeMouseMove);
+    document.addEventListener("mousemove", resizeMouseMove);
   document.addEventListener("touchmove", resizeMouseMove, { passive: false });
-  document.addEventListener("mouseup", resizeMouseUp);
+    document.addEventListener("mouseup", resizeMouseUp);
   document.addEventListener("touchend", resizeMouseUp);
-  e.preventDefault();
+    e.preventDefault();
 }
 
 // Handle resizing based on handle direction with improved methods
@@ -562,109 +562,18 @@ function handleFormSubmit(e) {
     });
 }
 
-// Create WhatsApp message with original image
+// Create WhatsApp message (simplified)
 function createWhatsAppMessageWithImage(name, phone, address, phoneData, userImage) {
   return new Promise((resolve, reject) => {
-    console.log('Creating WhatsApp message with original image...');
+    console.log('Creating WhatsApp message...');
     
-    // Check if image exists and has src
-    if (!userImage || !userImage.src || userImage.src === '') {
-      console.log('No user image found, falling back to text-only message');
-      // Fallback to text-only message
-      const message = createWhatsAppMessage(name, phone, address, phoneData);
-      resolve(message);
-      return;
-    }
-    
-    console.log('User image found:', userImage.src);
-    
-    try {
-      // Upload image to ImgBB
-      uploadImageToImgBB(userImage.src)
-        .then(imageUrl => {
-          console.log('Image uploaded to ImgBB:', imageUrl);
-          
-          // Store the image URL
-          window.orderImageUrl = imageUrl;
-          
-          // Show the ImgBB link to the user
-          showImgBBLink(imageUrl);
-          
-          // Also display link in a dedicated area on the page
-          displayImgBBLinkOnPage(imageUrl);
-          
-          // Create message with image URL
-          const message = createWhatsAppMessage(name, phone, address, phoneData);
-          
-          resolve(message);
-        })
-        .catch(error => {
-          console.error('Error uploading to ImgBB:', error);
-          
-          // Fallback to text-only message
-          const message = createWhatsAppMessage(name, phone, address, phoneData);
-          resolve(message);
-        });
-      
-    } catch (error) {
-      console.error('Error processing image:', error);
-      // Fallback to text-only message
-      const message = createWhatsAppMessage(name, phone, address, phoneData);
-      resolve(message);
-    }
+    // Create simple text message
+    const message = createWhatsAppMessage(name, phone, address, phoneData);
+    resolve(message);
   });
 }
 
-// Upload image to ImgBB
-function uploadImageToImgBB(imageDataUrl) {
-  return new Promise((resolve, reject) => {
-    // Check if AI Assistant is available
-    if (window.aiAssistant) {
-      console.log('Using AI Assistant for ImgBB upload...');
-      window.aiAssistant.smartImgBBUpload(imageDataUrl)
-        .then(resolve)
-        .catch(reject);
-      return;
-    }
 
-    // Fallback to original method
-    console.log('AI Assistant not available, using fallback method...');
-    
-    // ImgBB API Key - You need to get this from https://api.imgbb.com/
-    // 1. Go to https://api.imgbb.com/
-    // 2. Sign up for a free account
-    // 3. Get your API key from the dashboard
-    // 4. Replace 'YOUR_IMGBB_API_KEY' with your actual API key
-    const API_KEY = localStorage.getItem('imgbb_api_key') || 'YOUR_IMGBB_API_KEY';
-    
-    // Convert data URL to blob
-    const imageBlob = dataURLtoBlob(imageDataUrl);
-    
-    // Create FormData
-    const formData = new FormData();
-    formData.append('image', imageBlob, 'customer-image.jpg');
-    
-    // Make API request to ImgBB
-    fetch(`https://api.imgbb.com/1/upload?key=${API_KEY}`, {
-      method: 'POST',
-      body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        console.log('ImgBB upload successful:', data.data);
-        resolve(data.data.url);
-      } else {
-        console.error('ImgBB upload failed:', data.error);
-        reject(new Error('ImgBB upload failed'));
-      }
-    })
-    .catch(error => {
-      console.error('Error uploading to ImgBB:', error);
-      reject(error);
-    });
-  });
-}
 
 // Create WhatsApp message (text only)
 function createWhatsAppMessage(name, phone, address, phoneData) {
@@ -681,7 +590,6 @@ function createWhatsAppMessage(name, phone, address, phoneData) {
 
 *Order Details:*
 🎨 Custom cover design
-📸 Customer image uploaded to ImgBB
 
 ---
 *Order sent from COVERF.LB website*`;
@@ -693,507 +601,23 @@ function createWhatsAppMessage(name, phone, address, phoneData) {
 function sendToWhatsApp(message) {
   const whatsappNumber = '+243998189909';
   
-  // Check if we have image URL from any service
-  if (window.orderImageUrl) {
-    try {
-      // Determine the type of URL and format message accordingly
-      let imageNote = '';
-      
-      if (window.orderImageUrl.startsWith('data:')) {
-        // Data URL - inform about image processing
-        imageNote = `\n\n📸 *Customer Image:* Image has been processed and is ready for printing. The image data is attached to this order.`;
-      } else if (window.orderImageUrl.includes('ibb.co') || window.orderImageUrl.includes('imgur.com') || window.orderImageUrl.includes('cloudinary.com')) {
-        // External hosting service
-        imageNote = `\n\n📸 *Customer Image:* ${window.orderImageUrl}`;
-      } else {
-        // Unknown format
-        imageNote = `\n\n📸 *Customer Image:* Image uploaded successfully. Please check the attached image data.`;
-      }
-      
-      const fullMessage = message + encodeURIComponent(imageNote);
-      const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${fullMessage}`;
-      
-      // Open WhatsApp in new tab
-      window.open(whatsappUrl, '_blank');
-      
-      console.log('WhatsApp opened with image URL from:', window.orderImageUrl.substring(0, 50) + '...');
-      
-    } catch (error) {
-      console.error('Error sending image URL:', error);
-      
-      // Fallback to text-only message
-      const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${message}`;
-      window.open(whatsappUrl, '_blank');
-    }
-  } else {
-    // Send text-only message
-    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${message}`;
-    window.open(whatsappUrl, '_blank');
-    
-    console.log('WhatsApp opened with text-only message');
-  }
+  // Send text-only message
+  const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${message}`;
+  window.open(whatsappUrl, '_blank');
+  
+  console.log('WhatsApp opened with text-only message');
   
   // Show success message
   showSuccessMessage();
 }
 
-// Convert data URL to Blob (for ImgBB upload)
-function dataURLtoBlob(dataURL) {
-  const arr = dataURL.split(',');
-  const mime = arr[0].match(/:(.*?);/)[1];
-  const bstr = atob(arr[1]);
-  let n = bstr.length;
-  const u8arr = new Uint8Array(n);
-  
-  while (n--) {
-    u8arr[n] = bstr.charCodeAt(n);
-  }
-  
-  return new Blob([u8arr], { type: mime });
-}
 
-// Show image link to user
-function showImgBBLink(imageUrl) {
-  // Determine service type
-  let serviceName = 'Image Service';
-  let serviceIcon = 'fas fa-link';
-  let serviceColor = '#48bb78';
-  
-  if (imageUrl.includes('ibb.co')) {
-    serviceName = 'ImgBB';
-    serviceIcon = 'fas fa-cloud-upload-alt';
-    serviceColor = '#667eea';
-  } else if (imageUrl.includes('imgur.com')) {
-    serviceName = 'Imgur';
-    serviceIcon = 'fas fa-images';
-    serviceColor = '#1bb76e';
-  } else if (imageUrl.includes('cloudinary.com')) {
-    serviceName = 'Cloudinary';
-    serviceIcon = 'fas fa-cloud';
-    serviceColor = '#f39c12';
-  } else if (imageUrl.startsWith('data:')) {
-    serviceName = 'Local Processing';
-    serviceIcon = 'fas fa-cog';
-    serviceColor = '#9b59b6';
-  }
-  
-  // Create notification
-  const notification = document.createElement('div');
-  notification.className = 'imgbb-notification';
-  
-  notification.innerHTML = `
-    <div class="notification-content">
-      <i class="${serviceIcon}" style="color: ${serviceColor};"></i>
-      <div>
-        <div style="font-weight: 600; margin-bottom: 8px; color: ${serviceColor};">
-          <i class="fas fa-check-circle"></i> Image uploaded to ${serviceName} successfully!
-        </div>
-        <div style="font-size: 12px; margin-bottom: 10px; color: #e2e8f0;">
-          ${imageUrl.startsWith('data:') ? 'Image processed and ready for printing' : 'Click the link below to copy it to clipboard:'}
-        </div>
-        ${imageUrl.startsWith('data:') ? `
-          <div class="imgbb-link" style="background: rgba(255,255,255,0.15); padding: 10px 12px; border-radius: 8px; font-size: 11px; word-break: break-all; border: 2px solid rgba(255,255,255,0.3);">
-            <i class="fas fa-image" style="margin-right: 5px; color: ${serviceColor};"></i>
-            Image processed successfully (${Math.round(imageUrl.length / 1024)} KB)
-          </div>
-        ` : `
-          <div class="imgbb-link" onclick="copyImgBBLink('${imageUrl}')" style="cursor: pointer; background: rgba(255,255,255,0.15); padding: 10px 12px; border-radius: 8px; font-size: 11px; word-break: break-all; border: 2px solid rgba(255,255,255,0.3); transition: all 0.3s ease; hover:background: rgba(255,255,255,0.25);">
-            <i class="fas fa-copy" style="margin-right: 5px; color: ${serviceColor};"></i>
-            ${imageUrl}
-          </div>
-        `}
-        <div style="font-size: 10px; margin-top: 8px; opacity: 0.8; color: #cbd5e0;">
-          ${imageUrl.startsWith('data:') ? '<i class="fas fa-check"></i> Ready for WhatsApp' : '<i class="fas fa-mouse-pointer"></i> Click to copy link'}
-        </div>
-        <div style="font-size: 10px; margin-top: 5px; opacity: 0.6; color: #a0aec0;">
-          ${imageUrl.startsWith('data:') ? 'Image data will be included in WhatsApp message' : 'Link will be automatically added to WhatsApp message'}
-        </div>
-      </div>
-      <button onclick="this.parentElement.parentElement.remove()" style="background: none; border: none; color: white; font-size: 18px; cursor: pointer; position: absolute; top: 10px; right: 10px; padding: 5px; border-radius: 5px; transition: all 0.3s ease;">×</button>
-    </div>
-  `;
-  
-  // Add styles
-  notification.style.cssText = `
-    position: fixed;
-    top: 20px;
-    left: 20px;
-    background: linear-gradient(45deg, #667eea, #764ba2);
-    color: white;
-    padding: 20px;
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
-    z-index: 10000;
-    animation: slideInLeft 0.5s ease-out;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    max-width: 400px;
-    min-width: 300px;
-  `;
-  
-  // Add animation styles
-  const style = document.createElement('style');
-  style.textContent = `
-    @keyframes slideInLeft {
-      from {
-        opacity: 0;
-        transform: translateX(-100%);
-      }
-      to {
-        opacity: 1;
-        transform: translateX(0);
-      }
-    }
-  `;
-  document.head.appendChild(style);
-  
-  // Add to page
-  document.body.appendChild(notification);
-  
-  // Remove after 30 seconds
-  setTimeout(() => {
-    if (notification.parentElement) {
-      notification.style.animation = 'slideOutLeft 0.5s ease-out';
-      setTimeout(() => {
-        if (notification.parentElement) {
-          notification.remove();
-        }
-      }, 500);
-    }
-  }, 30000);
-  
-  // Add slide out animation
-  const slideOutStyle = document.createElement('style');
-  slideOutStyle.textContent = `
-    @keyframes slideOutLeft {
-      from {
-        opacity: 1;
-        transform: translateX(0);
-      }
-      to {
-        opacity: 0;
-        transform: translateX(-100%);
-      }
-    }
-  `;
-  document.head.appendChild(slideOutStyle);
-}
 
-// Display image link on the page
-function displayImgBBLinkOnPage(imageUrl) {
-  // Remove existing link display
-  const existingDisplay = document.getElementById('imgbb-link-display');
-  if (existingDisplay) {
-    existingDisplay.remove();
-  }
-  
-  // Determine service type
-  let serviceName = 'Image Service';
-  let serviceIcon = 'fas fa-link';
-  let serviceColor = '#48bb78';
-  
-  if (imageUrl.includes('ibb.co')) {
-    serviceName = 'ImgBB';
-    serviceIcon = 'fas fa-cloud-upload-alt';
-    serviceColor = '#667eea';
-  } else if (imageUrl.includes('imgur.com')) {
-    serviceName = 'Imgur';
-    serviceIcon = 'fas fa-images';
-    serviceColor = '#1bb76e';
-  } else if (imageUrl.includes('cloudinary.com')) {
-    serviceName = 'Cloudinary';
-    serviceIcon = 'fas fa-cloud';
-    serviceColor = '#f39c12';
-  } else if (imageUrl.startsWith('data:')) {
-    serviceName = 'Local Processing';
-    serviceIcon = 'fas fa-cog';
-    serviceColor = '#9b59b6';
-  }
-  
-  // Create link display area
-  const linkDisplay = document.createElement('div');
-  linkDisplay.id = 'imgbb-link-display';
-  linkDisplay.innerHTML = `
-    <div class="link-display-container">
-      <div class="link-display-header">
-        <i class="${serviceIcon}" style="color: ${serviceColor};"></i>
-        <span>Image uploaded to ${serviceName}</span>
-      </div>
-      <div class="link-display-content">
-        ${imageUrl.startsWith('data:') ? `
-          <div class="link-text" title="Image processed successfully">
-            <i class="fas fa-image" style="margin-right: 5px; color: ${serviceColor};"></i>
-            Image processed successfully (${Math.round(imageUrl.length / 1024)} KB)
-          </div>
-          <div class="link-actions">
-            <button onclick="copyImgBBLink('${imageUrl}')" class="copy-btn">
-              <i class="fas fa-copy"></i> Copy Data
-            </button>
-            <button onclick="downloadImage('${imageUrl}')" class="open-btn">
-              <i class="fas fa-download"></i> Download
-            </button>
-          </div>
-        ` : `
-          <div class="link-text" onclick="copyImgBBLink('${imageUrl}')" title="Click to copy">
-            ${imageUrl}
-          </div>
-          <div class="link-actions">
-            <button onclick="copyImgBBLink('${imageUrl}')" class="copy-btn">
-              <i class="fas fa-copy"></i> Copy
-            </button>
-            <button onclick="window.open('${imageUrl}', '_blank')" class="open-btn">
-              <i class="fas fa-external-link-alt"></i> Open
-            </button>
-          </div>
-        `}
-      </div>
-    </div>
-  `;
-  
-  // Add styles
-  linkDisplay.style.cssText = `
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background: linear-gradient(45deg, #667eea, #764ba2);
-    color: white;
-    padding: 20px;
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
-    z-index: 9999;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    max-width: 400px;
-    min-width: 300px;
-    animation: slideInUp 0.5s ease-out;
-  `;
-  
-  // Add internal styles
-  const internalStyle = document.createElement('style');
-  internalStyle.textContent = `
-    .link-display-container {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-    
-    .link-display-header {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 15px;
-      font-weight: 600;
-      font-size: 16px;
-    }
-    
-    .link-display-content {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    
-    .link-text {
-      background: rgba(255,255,255,0.1);
-      padding: 10px 12px;
-      border-radius: 8px;
-      font-size: 12px;
-      word-break: break-all;
-      border: 1px solid rgba(255,255,255,0.2);
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-    
-    .link-text:hover {
-      background: rgba(255,255,255,0.2);
-      transform: translateY(-1px);
-    }
-    
-    .link-actions {
-      display: flex;
-      gap: 10px;
-    }
-    
-    .copy-btn, .open-btn {
-      flex: 1;
-      padding: 8px 12px;
-      border: none;
-      border-radius: 8px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 5px;
-    }
-    
-    .copy-btn {
-      background: rgba(255,255,255,0.2);
-      color: white;
-    }
-    
-    .copy-btn:hover {
-      background: rgba(255,255,255,0.3);
-      transform: translateY(-1px);
-    }
-    
-    .open-btn {
-      background: #48bb78;
-      color: white;
-    }
-    
-    .open-btn:hover {
-      background: #38a169;
-      transform: translateY(-1px);
-    }
-    
-    @keyframes slideInUp {
-      from {
-        opacity: 0;
-        transform: translateY(100%);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-  `;
-  document.head.appendChild(internalStyle);
-  
-  // Add to page
-  document.body.appendChild(linkDisplay);
-}
 
-// Download image function
-function downloadImage(dataUrl) {
-  const link = document.createElement('a');
-  link.href = dataUrl;
-  link.download = 'customer-image.jpg';
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  
-  // Show success message
-  if (window.aiAssistant) {
-    window.aiAssistant.log('Image downloaded successfully', 'success');
-  }
-}
 
-// Copy ImgBB link to clipboard
-function copyImgBBLink(url) {
-  // Show copying animation
-  const linkElement = document.querySelector('.imgbb-link');
-  if (linkElement) {
-    linkElement.innerHTML = `<i class="fas fa-spinner fa-spin" style="margin-right: 5px; color: #48bb78;"></i> Copying...`;
-    linkElement.style.background = 'rgba(72, 187, 120, 0.2)';
-  }
 
-  navigator.clipboard.writeText(url).then(() => {
-    // Show copy success message
-    const copyNotification = document.createElement('div');
-    copyNotification.innerHTML = `
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <i class="fas fa-check-circle"></i>
-        <span>ImgBB link copied to clipboard!</span>
-      </div>
-    `;
-    
-    copyNotification.style.cssText = `
-      position: fixed;
-      top: 80px;
-      left: 20px;
-      background: linear-gradient(45deg, #48bb78, #38a169);
-      color: white;
-      padding: 12px 18px;
-      border-radius: 10px;
-      font-size: 13px;
-      font-weight: 600;
-      z-index: 10001;
-      animation: fadeInOut 3s ease-out;
-      box-shadow: 0 8px 25px rgba(72, 187, 120, 0.3);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-    `;
-    
-    const fadeStyle = document.createElement('style');
-    fadeStyle.textContent = `
-      @keyframes fadeInOut {
-        0% { opacity: 0; transform: translateY(-10px) scale(0.9); }
-        20% { opacity: 1; transform: translateY(0) scale(1); }
-        80% { opacity: 1; transform: translateY(0) scale(1); }
-        100% { opacity: 0; transform: translateY(-10px) scale(0.9); }
-      }
-    `;
-    document.head.appendChild(fadeStyle);
-    
-    document.body.appendChild(copyNotification);
-    
-    // Reset link element
-    if (linkElement) {
-      linkElement.innerHTML = `<i class="fas fa-copy" style="margin-right: 5px; color: #48bb78;"></i>${url}`;
-      linkElement.style.background = 'rgba(255,255,255,0.15)';
-    }
-    
-    setTimeout(() => {
-      if (copyNotification.parentElement) {
-        copyNotification.remove();
-      }
-    }, 3000);
-    
-    // Log success
-    if (window.aiAssistant) {
-      window.aiAssistant.log('ImgBB link copied to clipboard successfully', 'success');
-    }
-    
-  }).catch(err => {
-    console.error('Failed to copy link:', err);
-    
-    // Reset link element
-    if (linkElement) {
-      linkElement.innerHTML = `<i class="fas fa-copy" style="margin-right: 5px; color: #48bb78;"></i>${url}`;
-      linkElement.style.background = 'rgba(255,255,255,0.15)';
-    }
-    
-    // Show error message
-    const errorNotification = document.createElement('div');
-    errorNotification.innerHTML = `
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <i class="fas fa-exclamation-triangle"></i>
-        <span>Failed to copy link. Opening in new tab...</span>
-      </div>
-    `;
-    
-    errorNotification.style.cssText = `
-      position: fixed;
-      top: 80px;
-      left: 20px;
-      background: linear-gradient(45deg, #f56565, #e53e3e);
-      color: white;
-      padding: 12px 18px;
-      border-radius: 10px;
-      font-size: 13px;
-      font-weight: 600;
-      z-index: 10001;
-      animation: fadeInOut 3s ease-out;
-      box-shadow: 0 8px 25px rgba(245, 101, 101, 0.3);
-    `;
-    
-    document.body.appendChild(errorNotification);
-    
-    setTimeout(() => {
-      if (errorNotification.parentElement) {
-        errorNotification.remove();
-      }
-    }, 3000);
-    
-    // Fallback: open link in new tab
-    window.open(url, '_blank');
-    
-    // Log error
-    if (window.aiAssistant) {
-      window.aiAssistant.log('Failed to copy ImgBB link, opened in new tab', 'warning');
-    }
-  });
-}
+
+
 
 // Show success message
 function showSuccessMessage() {
@@ -1201,14 +625,11 @@ function showSuccessMessage() {
   const notification = document.createElement('div');
   notification.className = 'success-notification';
   
-  const hasImage = window.orderImageUrl !== null;
-  
   notification.innerHTML = `
     <div class="notification-content">
       <i class="fas fa-check-circle"></i>
       <div>
         <div>Order sent successfully to WhatsApp!</div>
-        ${hasImage ? '<div style="font-size: 12px; margin-top: 5px;">Customer image uploaded to ImgBB and sent with the order.</div>' : ''}
       </div>
     </div>
   `;
