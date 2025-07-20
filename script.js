@@ -43,26 +43,30 @@ function getContainerBounds() {
   const screenWidth = window.innerWidth;
   const screenHeight = window.innerHeight;
   
-  // Allow movement across full screen width
+  // Allow unlimited movement across the entire screen
   return {
-    minX: -screenWidth * 0.5,
-    maxX: screenWidth * 0.5,
-    minY: -screenHeight * 0.3,
-    maxY: screenHeight * 0.3
+    minX: -screenWidth * 2,
+    maxX: screenWidth * 2,
+    minY: -screenHeight * 2,
+    maxY: screenHeight * 2
   };
 }
 
-// Constrain position within container bounds
+// Constrain position within container bounds (minimal constraints)
 function constrainPosition(x, y, width, height) {
   const bounds = getContainerBounds();
   const scaledWidth = width * scale;
   const scaledHeight = height * scale;
-  const maxX = bounds.maxX - scaledWidth;
-  const maxY = bounds.maxY - scaledHeight;
+  
+  // Only prevent the image from going completely off-screen
+  const maxX = bounds.maxX - scaledWidth * 0.1;
+  const maxY = bounds.maxY - scaledHeight * 0.1;
+  const minX = bounds.minX + scaledWidth * 0.1;
+  const minY = bounds.minY + scaledHeight * 0.1;
   
   return {
-    x: Math.max(bounds.minX, Math.min(maxX, x)),
-    y: Math.max(bounds.minY, Math.min(maxY, y))
+    x: Math.max(minX, Math.min(maxX, x)),
+    y: Math.max(minY, Math.min(maxY, y))
   };
 }
 
@@ -290,7 +294,7 @@ function startResize(e) {
   e.preventDefault();
 }
 
-// Handle resizing based on handle direction
+// Handle resizing based on handle direction with improved methods
 function resizeMouseMove(e) {
   if (!currentHandle) return;
   
@@ -298,29 +302,44 @@ function resizeMouseMove(e) {
   let dx = coords.clientX - startMouseX;
   let dy = coords.clientY - startMouseY;
   
+  // Calculate scale factor for smoother resizing
+  const scaleFactor = 1.5;
+  dx *= scaleFactor;
+  dy *= scaleFactor;
+  
   let newWidth, newHeight, newOffsetX = startOffsetX, newOffsetY = startOffsetY;
   
   switch (currentHandle.className) {
     case "resize-handle br": // Bottom right corner
-      newWidth = Math.max(50, Math.min(1000, startWidth + dx));
-      newHeight = Math.max(50, Math.min(1000, startHeight + dy));
+      newWidth = Math.max(30, Math.min(2000, startWidth + dx));
+      newHeight = Math.max(30, Math.min(2000, startHeight + dy));
       break;
     case "resize-handle bl": // Bottom left
-      newWidth = Math.max(50, Math.min(1000, startWidth - dx));
-      newHeight = Math.max(50, Math.min(1000, startHeight + dy));
+      newWidth = Math.max(30, Math.min(2000, startWidth - dx));
+      newHeight = Math.max(30, Math.min(2000, startHeight + dy));
       newOffsetX = startOffsetX + dx;
       break;
     case "resize-handle tr": // Top right
-      newWidth = Math.max(50, Math.min(1000, startWidth + dx));
-      newHeight = Math.max(50, Math.min(1000, startHeight - dy));
+      newWidth = Math.max(30, Math.min(2000, startWidth + dx));
+      newHeight = Math.max(30, Math.min(2000, startHeight - dy));
       newOffsetY = startOffsetY + dy;
       break;
     case "resize-handle tl": // Top left
-      newWidth = Math.max(50, Math.min(1000, startWidth - dx));
-      newHeight = Math.max(50, Math.min(1000, startHeight - dy));
+      newWidth = Math.max(30, Math.min(2000, startWidth - dx));
+      newHeight = Math.max(30, Math.min(2000, startHeight - dy));
       newOffsetX = startOffsetX + dx;
       newOffsetY = startOffsetY + dy;
       break;
+  }
+  
+  // Maintain aspect ratio if shift key is pressed (optional)
+  if (e.shiftKey) {
+    const aspectRatio = startWidth / startHeight;
+    if (Math.abs(dx) > Math.abs(dy)) {
+      newHeight = newWidth / aspectRatio;
+    } else {
+      newWidth = newHeight * aspectRatio;
+    }
   }
   
   // Constrain position after resize
@@ -329,9 +348,14 @@ function resizeMouseMove(e) {
   offsetX = constrained.x;
   offsetY = constrained.y;
   
+  // Apply new dimensions with smooth transition
   userImg.style.width = newWidth + "px";
   userImg.style.height = newHeight + "px";
+  
+  // Update transform with smooth animation
+  userImgWrapper.style.transition = "transform 0.1s ease-out";
   updateTransform();
+  
   e.preventDefault();
 }
 
