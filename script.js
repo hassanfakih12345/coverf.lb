@@ -579,22 +579,72 @@ function createWhatsAppMessageWithImage(name, phone, address, phoneData, userIma
     console.log('User image found:', userImage.src);
     
     try {
-      // Store the original image data directly
-      window.orderImageData = userImage.src;
-      
-      console.log('Original image data stored successfully');
-      
-      // Create message
-      const message = createWhatsAppMessage(name, phone, address, phoneData);
-      
-      resolve(message);
+      // Upload image to ImgBB
+      uploadImageToImgBB(userImage.src)
+        .then(imageUrl => {
+          console.log('Image uploaded to ImgBB:', imageUrl);
+          
+          // Store the image URL
+          window.orderImageUrl = imageUrl;
+          
+          // Create message with image URL
+          const message = createWhatsAppMessage(name, phone, address, phoneData);
+          
+          resolve(message);
+        })
+        .catch(error => {
+          console.error('Error uploading to ImgBB:', error);
+          
+          // Fallback to text-only message
+          const message = createWhatsAppMessage(name, phone, address, phoneData);
+          resolve(message);
+        });
       
     } catch (error) {
-      console.error('Error storing original image:', error);
+      console.error('Error processing image:', error);
       // Fallback to text-only message
       const message = createWhatsAppMessage(name, phone, address, phoneData);
       resolve(message);
     }
+  });
+}
+
+// Upload image to ImgBB
+function uploadImageToImgBB(imageDataUrl) {
+  return new Promise((resolve, reject) => {
+    // ImgBB API Key - You need to get this from https://api.imgbb.com/
+    // 1. Go to https://api.imgbb.com/
+    // 2. Sign up for a free account
+    // 3. Get your API key from the dashboard
+    // 4. Replace 'YOUR_IMGBB_API_KEY' with your actual API key
+    const API_KEY = 'YOUR_IMGBB_API_KEY'; // Replace with your actual API key
+    
+    // Convert data URL to blob
+    const imageBlob = dataURLtoBlob(imageDataUrl);
+    
+    // Create FormData
+    const formData = new FormData();
+    formData.append('image', imageBlob, 'customer-image.jpg');
+    
+    // Make API request to ImgBB
+    fetch(`https://api.imgbb.com/1/upload?key=${API_KEY}`, {
+      method: 'POST',
+      body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        console.log('ImgBB upload successful:', data.data);
+        resolve(data.data.url);
+      } else {
+        console.error('ImgBB upload failed:', data.error);
+        reject(new Error('ImgBB upload failed'));
+      }
+    })
+    .catch(error => {
+      console.error('Error uploading to ImgBB:', error);
+      reject(error);
+    });
   });
 }
 
@@ -613,7 +663,7 @@ function createWhatsAppMessage(name, phone, address, phoneData) {
 
 *Order Details:*
 🎨 Custom cover design
-📸 Customer image attached
+📸 Customer image uploaded to ImgBB
 
 ---
 *Order sent from COVERF.LB website*`;
@@ -625,58 +675,21 @@ function createWhatsAppMessage(name, phone, address, phoneData) {
 function sendToWhatsApp(message) {
   const whatsappNumber = '+243998189909';
   
-  // Check if we have image data
-  if (window.orderImageData) {
+  // Check if we have image URL from ImgBB
+  if (window.orderImageUrl) {
     try {
-      // Convert base64 to blob for file upload
-      const imageBlob = dataURLtoBlob(window.orderImageData);
+      // Add image URL to message
+      const imageNote = `\n\n📸 *Customer Image:* ${window.orderImageUrl}`;
+      const fullMessage = message + encodeURIComponent(imageNote);
+      const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${fullMessage}`;
       
-      // Create a temporary file input
-      const fileInput = document.createElement('input');
-      fileInput.type = 'file';
-      fileInput.accept = 'image/*';
-      fileInput.style.display = 'none';
+      // Open WhatsApp in new tab
+      window.open(whatsappUrl, '_blank');
       
-      // Create a File object from the blob
-      const file = new File([imageBlob], 'customer-image.jpg', { type: 'image/jpeg' });
-      
-      // Create a DataTransfer object and add the file
-      const dataTransfer = new DataTransfer();
-      dataTransfer.items.add(file);
-      fileInput.files = dataTransfer.files;
-      
-      // Add to DOM temporarily
-      document.body.appendChild(fileInput);
-      
-      // Try to send image via WhatsApp Web API (if available)
-      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-        navigator.share({
-          title: 'COVERF.LB - Customer Order',
-          text: message,
-          files: [file]
-        }).then(() => {
-          console.log('Image shared successfully via Web Share API');
-        }).catch((error) => {
-          console.error('Error sharing image:', error);
-          // Fallback to text message
-          const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${message}`;
-          window.open(whatsappUrl, '_blank');
-        });
-      } else {
-        // Fallback: Send text message with image note
-        const imageNote = `\n\n📸 *Customer Image:* The customer's image is ready for printing. Please check the uploaded file.`;
-        const fullMessage = message + encodeURIComponent(imageNote);
-        const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${fullMessage}`;
-        window.open(whatsappUrl, '_blank');
-        
-        console.log('WhatsApp opened with image note (fallback)');
-      }
-      
-      // Clean up
-      document.body.removeChild(fileInput);
+      console.log('WhatsApp opened with ImgBB image URL');
       
     } catch (error) {
-      console.error('Error sending image:', error);
+      console.error('Error sending image URL:', error);
       
       // Fallback to text-only message
       const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${message}`;
@@ -694,7 +707,7 @@ function sendToWhatsApp(message) {
   showSuccessMessage();
 }
 
-// Convert data URL to Blob
+// Convert data URL to Blob (for ImgBB upload)
 function dataURLtoBlob(dataURL) {
   const arr = dataURL.split(',');
   const mime = arr[0].match(/:(.*?);/)[1];
@@ -709,22 +722,20 @@ function dataURLtoBlob(dataURL) {
   return new Blob([u8arr], { type: mime });
 }
 
-// Note: Image download function removed - images are now sent directly to WhatsApp
-
 // Show success message
 function showSuccessMessage() {
   // Create success notification
   const notification = document.createElement('div');
   notification.className = 'success-notification';
   
-  const hasImage = window.orderImageData !== null;
+  const hasImage = window.orderImageUrl !== null;
   
   notification.innerHTML = `
     <div class="notification-content">
       <i class="fas fa-check-circle"></i>
       <div>
         <div>Order sent successfully to WhatsApp!</div>
-        ${hasImage ? '<div style="font-size: 12px; margin-top: 5px;">Customer image has been sent with the order.</div>' : ''}
+        ${hasImage ? '<div style="font-size: 12px; margin-top: 5px;">Customer image uploaded to ImgBB and sent with the order.</div>' : ''}
       </div>
     </div>
   `;
