@@ -1,0 +1,667 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  direction: ltr;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  user-select: none;
+  color: #333;
+  overflow-x: hidden;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  padding: 12px 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  transition: transform 0.3s ease;
+  min-height: 70px;
+}
+
+header.hidden {
+  transform: translateY(-100%);
+}
+
+.contact-info {
+  text-align: right;
+  display: flex;
+  gap: 12px;
+  order: 1;
+  flex: 1;
+  justify-content: flex-start;
+}
+
+.logo-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  order: 2;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1001;
+}
+
+.logo-area img {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  object-fit: contain;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  transition: transform 0.3s ease;
+  background: transparent;
+}
+
+.logo-area img:hover {
+  transform: scale(1.05);
+}
+
+.project-name {
+  color: #2d3748;
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: -0.5px;
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.contact-link {
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.3s ease;
+}
+
+.contact-link:hover {
+  transform: translateY(-2px);
+}
+
+.contact-info span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  background: rgba(102, 126, 234, 0.1);
+  border-radius: 15px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #4a5568;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.contact-info span:hover {
+  background: rgba(102, 126, 234, 0.2);
+  transform: translateY(-2px);
+}
+
+.main-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 15px;
+  margin-top: 100px;
+}
+
+.hero-section {
+  text-align: center;
+  margin-bottom: 40px;
+  animation: fadeInUp 0.8s ease-out;
+}
+
+.hero-section h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 15px;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.hero-section h1 i {
+  margin-right: 15px;
+  color: #ffd700;
+}
+
+.hero-section p {
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.9);
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.phone-categories {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  animation: fadeInUp 1s ease-out 0.2s both;
+}
+
+.category-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+}
+
+.tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: rgba(102, 126, 234, 0.1);
+  border: 2px solid transparent;
+  border-radius: 25px;
+  color: #4a5568;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.tab-btn:hover {
+  background: rgba(102, 126, 234, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+.tab-btn.active {
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  color: white;
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+.tab-btn i {
+  font-size: 16px;
+}
+
+.phone-grid {
+  position: relative;
+}
+
+.phone-category {
+  display: none;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  animation: fadeIn 0.5s ease-out;
+}
+
+.phone-category.active {
+  display: grid;
+}
+
+.phone-card {
+  background: white;
+  border-radius: 15px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  border: 2px solid transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+.phone-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.phone-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+  border-color: rgba(102, 126, 234, 0.3);
+}
+
+.phone-card:hover::before {
+  transform: scaleX(1);
+}
+
+.phone-card.selected {
+  border-color: #667eea;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+  box-shadow: 0 15px 40px rgba(102, 126, 234, 0.2);
+}
+
+.phone-card.selected::before {
+  transform: scaleX(1);
+}
+
+.phone-image {
+  margin-bottom: 15px;
+  position: relative;
+}
+
+.phone-image img {
+  width: 100%;
+  max-width: 120px;
+  height: auto;
+  object-fit: contain;
+  transition: transform 0.3s ease;
+}
+
+.phone-card:hover .phone-image img {
+  transform: scale(1.05);
+}
+
+.phone-info h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 5px;
+}
+
+.phone-info p {
+  font-size: 12px;
+  color: #718096;
+  font-weight: 500;
+}
+
+.selected-phone-info {
+  margin-top: 40px;
+  animation: fadeInUp 0.8s ease-out;
+}
+
+.selected-phone-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  padding: 30px;
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.selected-phone-image {
+  flex-shrink: 0;
+}
+
+.selected-phone-image img {
+  width: 150px;
+  height: auto;
+  object-fit: contain;
+}
+
+.selected-phone-details {
+  flex: 1;
+}
+
+.selected-phone-details h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #2d3748;
+  margin-bottom: 10px;
+}
+
+.selected-phone-details p {
+  font-size: 16px;
+  color: #718096;
+  margin-bottom: 25px;
+}
+
+.start-design-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 15px 30px;
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+  border-radius: 25px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+.start-design-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
+}
+
+.start-design-btn i {
+  font-size: 18px;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  header {
+    flex-direction: row;
+    gap: 8px;
+    padding: 8px 12px;
+    min-height: 60px;
+  }
+  
+  .contact-info {
+    flex-direction: row;
+    gap: 6px;
+    order: 1;
+    text-align: right;
+    flex: 1;
+    justify-content: flex-start;
+  }
+  
+  .contact-info span {
+    font-size: 9px;
+    padding: 4px 8px;
+    gap: 3px;
+  }
+  
+  .project-name {
+    font-size: 14px;
+  }
+  
+  .logo-area {
+    order: 2;
+    gap: 4px;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1001;
+  }
+  
+  .logo-area img {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .main-content {
+    margin-top: 70px;
+    padding: 0 10px;
+  }
+  
+  .hero-section h1 {
+    font-size: 2rem;
+  }
+  
+  .hero-section p {
+    font-size: 1rem;
+  }
+  
+  .phone-categories {
+    padding: 20px;
+  }
+  
+  .category-tabs {
+    gap: 10px;
+  }
+  
+  .tab-btn {
+    padding: 10px 20px;
+    font-size: 13px;
+  }
+  
+  .phone-category {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+  }
+  
+  .phone-card {
+    padding: 15px;
+  }
+  
+  .selected-phone-card {
+    flex-direction: column;
+    text-align: center;
+    gap: 20px;
+  }
+  
+  .selected-phone-image img {
+    width: 120px;
+  }
+}
+
+@media (max-width: 480px) {
+  header {
+    padding: 6px 8px;
+    min-height: 55px;
+  }
+  
+  .contact-info {
+    gap: 4px;
+    flex: 1;
+    justify-content: flex-start;
+  }
+  
+  .contact-info span {
+    font-size: 8px;
+    padding: 3px 6px;
+    gap: 2px;
+  }
+  
+  .project-name {
+    font-size: 12px;
+  }
+  
+  .logo-area {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1001;
+    gap: 3px;
+  }
+  
+  .logo-area img {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .main-content {
+    padding: 0 5px;
+    margin-top: 65px;
+  }
+  
+  .hero-section h1 {
+    font-size: 1.5rem;
+  }
+  
+  .hero-section p {
+    font-size: 0.9rem;
+  }
+  
+  .phone-categories {
+    padding: 15px;
+  }
+  
+  .category-tabs {
+    gap: 8px;
+  }
+  
+  .tab-btn {
+    padding: 8px 16px;
+    font-size: 12px;
+  }
+  
+  .phone-category {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px;
+  }
+  
+  .phone-card {
+    padding: 12px;
+  }
+  
+  .phone-info h3 {
+    font-size: 14px;
+  }
+  
+  .phone-info p {
+    font-size: 11px;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(45deg, #764ba2, #667eea);
+} 
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  padding: 15px 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  transition: transform 0.3s ease;
+}
+
+.back-button {
+  order: 3;
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  color: white;
+  text-decoration: none;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.back-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+  background: linear-gradient(45deg, #764ba2, #667eea);
+}
+
+.back-btn i {
+  font-size: 16px;
+}
+
+.back-btn span {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .back-btn span {
+    display: inline;
+  }
+} 
+
+/* Additional responsive improvements */
+@media (max-width: 1024px) {
+  .contact-info span {
+    font-size: 10px;
+    padding: 4px 8px;
+  }
+  
+  .project-name {
+    font-size: 15px;
+  }
+  
+  .logo-area img {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+@media (max-width: 600px) {
+  .contact-info {
+    gap: 5px;
+  }
+  
+  .contact-info span {
+    font-size: 9px;
+    padding: 3px 7px;
+  }
+  
+  .project-name {
+    font-size: 13px;
+  }
+  
+  .logo-area img {
+    width: 30px;
+    height: 30px;
+  }
+}
+
+/* Ensure header doesn't overlap content */
+.main-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 15px;
+  margin-top: 90px;
+} 

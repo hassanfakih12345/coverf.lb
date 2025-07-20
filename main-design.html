@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>COVERF.LB - Cover Design</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+  <header>
+    <div class="contact-info">
+      <a href="https://wa.me/96176896910" target="_blank" class="contact-link">
+        <span><i class="fas fa-phone"></i> +961 76 896 910</span>
+      </a>
+      <a href="https://www.instagram.com/coverf.lb?igsh=MTZxbmduejZoYmgzeQ%3D%3D&utm_source=qr" target="_blank" class="contact-link">
+        <span><i class="fab fa-instagram"></i> coverf.lb</span>
+      </a>
+    </div>
+    <div class="logo-area">
+      <div class="project-name">COVERF.LB</div>
+      <img src="https://raw.githubusercontent.com/hassanfakih12345/coverf.lb/bba1f0562d107ee706dccc9d6d6a832a31b62d5b/LOGO/logo.png" alt="Logo" />
+    </div>
+    <div class="phone-selector-header">
+      <a href="index.html" class="phone-selector-header-btn">
+        <i class="fas fa-mobile-alt"></i>
+        <span>Choose Phone</span>
+      </a>
+    </div>
+  </header>
+
+  <div class="main-content">
+    <div id="phone-info-display" class="phone-info-display">
+      <h2><i class="fas fa-magic"></i> Design Your Cover for <span id="selected-phone-name">iPhone</span></h2>
+      <p class="phone-specs" id="selected-phone-specs">6.1" Display</p>
+    </div>
+
+    <div class="phone-selector-link">
+      <a href="index.html" class="phone-selector-btn">
+        <i class="fas fa-mobile-alt"></i>
+        Choose Different Phone Model
+      </a>
+    </div>
+
+    <div class="upload-section">
+      <label for="upload" class="upload-label">
+        <i class="fas fa-cloud-upload-alt"></i>
+        <span>Choose an image to design your cover</span>
+        <small>Click here or drag the image</small>
+      </label>
+      <input type="file" id="upload" accept="image/*" />
+    </div>
+
+    <div id="cover-container">
+      <div id="user-image-wrapper" hidden>
+        <img id="user-image" src="" alt="Customer Image" draggable="false" />
+        <div class="resize-handle tl" title="Resize from top-left corner"></div>
+        <div class="resize-handle tr" title="Resize from top-right corner"></div>
+        <div class="resize-handle bl" title="Resize from bottom-left corner"></div>
+        <div class="resize-handle br" title="Resize from bottom-right corner"></div>
+      </div>
+      <img id="template" src="" alt="Phone Template" />
+    </div>
+
+    <div class="instructions">
+      <div class="instruction-card">
+        <i class="fas fa-hand-pointer"></i>
+        <h3>Drag Image</h3>
+        <p>Drag the image freely within the cover</p>
+      </div>
+      <div class="instruction-card">
+        <i class="fas fa-expand-arrows-alt"></i>
+        <h3>Resize</h3>
+        <p>Drag corners to change image size</p>
+      </div>
+      <div class="instruction-card">
+        <i class="fas fa-search-plus"></i>
+        <h3>Zoom</h3>
+        <p>Use two fingers to zoom in and out</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+  <script src="template-loader.js"></script>
+</body>
+</html> 
