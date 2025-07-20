@@ -618,12 +618,24 @@ function createWhatsAppMessageWithImage(name, phone, address, phoneData, userIma
 // Upload image to ImgBB
 function uploadImageToImgBB(imageDataUrl) {
   return new Promise((resolve, reject) => {
+    // Check if AI Assistant is available
+    if (window.aiAssistant) {
+      console.log('Using AI Assistant for ImgBB upload...');
+      window.aiAssistant.smartImgBBUpload(imageDataUrl)
+        .then(resolve)
+        .catch(reject);
+      return;
+    }
+
+    // Fallback to original method
+    console.log('AI Assistant not available, using fallback method...');
+    
     // ImgBB API Key - You need to get this from https://api.imgbb.com/
     // 1. Go to https://api.imgbb.com/
     // 2. Sign up for a free account
     // 3. Get your API key from the dashboard
     // 4. Replace 'YOUR_IMGBB_API_KEY' with your actual API key
-    const API_KEY = 'YOUR_IMGBB_API_KEY'; // Replace with your actual API key
+    const API_KEY = localStorage.getItem('imgbb_api_key') || 'YOUR_IMGBB_API_KEY';
     
     // Convert data URL to blob
     const imageBlob = dataURLtoBlob(imageDataUrl);
