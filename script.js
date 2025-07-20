@@ -522,6 +522,15 @@ function handleFormSubmit(e) {
   // Get the user image
   const userImage = document.getElementById('user-image');
   
+  console.log('Form submitted:', {
+    customerName,
+    customerPhone,
+    customerAddress,
+    phoneData,
+    hasUserImage: !!userImage,
+    userImageSrc: userImage ? userImage.src : 'none'
+  });
+  
   // Show loading state
   const sendBtn = e.target.querySelector('.btn-send');
   const originalText = sendBtn.innerHTML;
@@ -531,6 +540,8 @@ function handleFormSubmit(e) {
   // Create WhatsApp message with image
   createWhatsAppMessageWithImage(customerName, customerPhone, customerAddress, phoneData, userImage)
     .then(message => {
+      console.log('Message created successfully');
+      
       // Send to WhatsApp
       sendToWhatsApp(message);
       
@@ -554,98 +565,116 @@ function handleFormSubmit(e) {
 // Create WhatsApp message with image
 function createWhatsAppMessageWithImage(name, phone, address, phoneData, userImage) {
   return new Promise((resolve, reject) => {
+    console.log('Creating WhatsApp message with image...');
+    
     // Check if image exists and has src
     if (!userImage || !userImage.src || userImage.src === '') {
+      console.log('No user image found, falling back to text-only message');
       // Fallback to text-only message
       const message = createWhatsAppMessage(name, phone, address, phoneData);
       resolve(message);
       return;
     }
     
-    // Create canvas to capture the design
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
+    console.log('User image found:', userImage.src);
     
-    // Set canvas size to match container
-    const container = document.getElementById('cover-container');
-    canvas.width = container.offsetWidth;
-    canvas.height = container.offsetHeight;
-    
-    // Load both user image and phone template
-    const tempImg = new Image();
-    const templateImg = new Image();
-    tempImg.crossOrigin = 'anonymous';
-    templateImg.crossOrigin = 'anonymous';
-    
-    let imagesLoaded = 0;
-    const totalImages = 2;
-    
-    function onImageLoad() {
-      imagesLoaded++;
-      if (imagesLoaded === totalImages) {
-        try {
-          // Draw background
-          ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-          
-          // Draw phone template first (as background)
-          ctx.drawImage(templateImg, 0, 0, canvas.width, canvas.height);
-          
-          // Calculate image position and size
-          const imgX = offsetX + (container.offsetWidth / 2);
-          const imgY = offsetY + (container.offsetHeight / 2);
-          
-          // Save current context
-          ctx.save();
-          
-          // Apply transformations
-          ctx.translate(imgX, imgY);
-          ctx.rotate(rotation * Math.PI / 180);
-          ctx.scale(scale, scale);
-          
-          // Draw the user image
-          ctx.drawImage(tempImg, -userImage.offsetWidth/2, -userImage.offsetHeight/2, userImage.offsetWidth, userImage.offsetHeight);
-          
-          // Restore context
-          ctx.restore();
-          
-          // Convert canvas to base64
-          const imageData = canvas.toDataURL('image/png', 0.9);
-          
-          // Create message with image
-          const message = createWhatsAppMessage(name, phone, address, phoneData);
-          
-          // Store image data for later use
-          window.orderImageData = imageData;
-          
-          resolve(message);
-        } catch (error) {
-          console.error('Error creating image:', error);
-          // Fallback to text-only message
-          const message = createWhatsAppMessage(name, phone, address, phoneData);
-          resolve(message);
-        }
-      }
+          try {
+        // Create canvas to capture the design
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Set canvas size to match container
+        const container = document.getElementById('cover-container');
+        canvas.width = container.offsetWidth;
+        canvas.height = container.offsetHeight;
+        
+        console.log('Canvas created:', {
+          width: canvas.width,
+          height: canvas.height,
+          containerWidth: container.offsetWidth,
+          containerHeight: container.offsetHeight
+        });
+      
+      // Create a temporary image to load the user image
+      const tempImg = new Image();
+      
+              tempImg.onload = () => {
+          try {
+            console.log('Image loaded successfully, drawing to canvas...');
+            
+            // Draw background
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Calculate image position and size
+            const imgX = offsetX + (container.offsetWidth / 2);
+            const imgY = offsetY + (container.offsetHeight / 2);
+            
+            console.log('Image positioning:', {
+              offsetX,
+              offsetY,
+              scale,
+              rotation,
+              imgX,
+              imgY,
+              userImageWidth: userImage.offsetWidth,
+              userImageHeight: userImage.offsetHeight
+            });
+            
+            // Save current context
+            ctx.save();
+            
+            // Apply transformations
+            ctx.translate(imgX, imgY);
+            ctx.rotate(rotation * Math.PI / 180);
+            ctx.scale(scale, scale);
+            
+            // Draw the user image
+            ctx.drawImage(tempImg, -userImage.offsetWidth/2, -userImage.offsetHeight/2, userImage.offsetWidth, userImage.offsetHeight);
+            
+            // Restore context
+            ctx.restore();
+            
+            console.log('Image drawn to canvas, converting to base64...');
+            
+            // Convert canvas to base64
+            const imageData = canvas.toDataURL('image/png', 0.8);
+            
+            console.log('Canvas converted to base64, length:', imageData.length);
+            
+            // Create message with image
+            const message = createWhatsAppMessage(name, phone, address, phoneData);
+            
+            // Store image data for later use
+            window.orderImageData = imageData;
+            
+            console.log('Image data stored successfully');
+            
+            resolve(message);
+          } catch (error) {
+            console.error('Error creating image:', error);
+            // Fallback to text-only message
+            const message = createWhatsAppMessage(name, phone, address, phoneData);
+            resolve(message);
+          }
+        };
+      
+      tempImg.onerror = () => {
+        console.error('Error loading user image');
+        // Fallback to text-only message
+        const message = createWhatsAppMessage(name, phone, address, phoneData);
+        resolve(message);
+      };
+      
+      // Set image source
+      tempImg.src = userImage.src;
+      
+    } catch (error) {
+      console.error('Error in image processing:', error);
+      // Fallback to text-only message
+      const message = createWhatsAppMessage(name, phone, address, phoneData);
+      resolve(message);
     }
-    
-    tempImg.onload = onImageLoad;
-    templateImg.onload = onImageLoad;
-    
-    tempImg.onerror = () => {
-      console.error('Error loading user image');
-      // Continue with template only
-      onImageLoad();
-    };
-    
-    templateImg.onerror = () => {
-      console.error('Error loading template image');
-      // Continue with user image only
-      onImageLoad();
-    };
-    
-    // Set image sources
-    tempImg.src = userImage.src;
-    templateImg.src = document.getElementById('template').src;
   });
 }
 
@@ -678,20 +707,32 @@ function sendToWhatsApp(message) {
   
   // Check if we have image data
   if (window.orderImageData) {
-    // Create a download link for the image
-    createImageDownload();
-    
-    // Add image note to message
-    const imageNote = `\n\n📸 *Design Image:* The design image has been automatically saved to your device as "coverf-design-[timestamp].png"`;
-    const fullMessage = message + encodeURIComponent(imageNote);
-    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${fullMessage}`;
-    
-    // Open WhatsApp in new tab
-    window.open(whatsappUrl, '_blank');
+    try {
+      // Create a download link for the image
+      createImageDownload();
+      
+      // Add image note to message
+      const imageNote = `\n\n📸 *Design Image:* The design image has been automatically saved to your device as "coverf-design-[timestamp].png"`;
+      const fullMessage = message + encodeURIComponent(imageNote);
+      const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${fullMessage}`;
+      
+      // Open WhatsApp in new tab
+      window.open(whatsappUrl, '_blank');
+      
+      console.log('Image saved and WhatsApp opened with image note');
+    } catch (error) {
+      console.error('Error saving image:', error);
+      
+      // Fallback to text-only message
+      const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${message}`;
+      window.open(whatsappUrl, '_blank');
+    }
   } else {
     // Send text-only message
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${message}`;
     window.open(whatsappUrl, '_blank');
+    
+    console.log('WhatsApp opened with text-only message');
   }
   
   // Show success message
@@ -700,20 +741,38 @@ function sendToWhatsApp(message) {
 
 // Create image download
 function createImageDownload() {
-  if (!window.orderImageData) return;
+  if (!window.orderImageData) {
+    console.log('No image data to download');
+    return;
+  }
   
-  // Create download link
-  const link = document.createElement('a');
-  link.download = `coverf-design-${Date.now()}.png`;
-  link.href = window.orderImageData;
-  
-  // Trigger download
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  
-  // Clear stored image data
-  window.orderImageData = null;
+  try {
+    // Create download link
+    const link = document.createElement('a');
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    link.download = `coverf-design-${timestamp}.png`;
+    link.href = window.orderImageData;
+    
+    // Add link to DOM temporarily
+    document.body.appendChild(link);
+    
+    // Trigger download
+    link.click();
+    
+    // Remove link from DOM
+    document.body.removeChild(link);
+    
+    console.log('Image download triggered:', link.download);
+    
+    // Clear stored image data after a short delay
+    setTimeout(() => {
+      window.orderImageData = null;
+    }, 1000);
+    
+  } catch (error) {
+    console.error('Error creating image download:', error);
+    throw error;
+  }
 }
 
 // Show success message
