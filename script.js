@@ -3,8 +3,6 @@ const upload = document.getElementById("upload");
 const uploadLabel = document.querySelector(".upload-label");
 const userImgWrapper = document.getElementById("user-image-wrapper");
 const userImg = document.getElementById("user-image");
-const widthInput = document.getElementById("widthInput");
-const heightInput = document.getElementById("heightInput");
 const coverContainer = document.getElementById("cover-container");
 const header = document.querySelector("header");
 
@@ -42,7 +40,6 @@ let isPinching = false;
 
 // Get container boundaries based on screen size
 function getContainerBounds() {
-  const containerRect = coverContainer.getBoundingClientRect();
   const screenWidth = window.innerWidth;
   const screenHeight = window.innerHeight;
   
@@ -159,53 +156,10 @@ function updateDrag(e) {
   e.preventDefault();
 }
 
-// Rotate image by given degrees
-function rotateImage(deg) {
-  rotation = (rotation + deg) % 360;
-  updateTransform();
-  
-  // Add visual feedback
-  const button = event.target.closest('button');
-  if (button) {
-    button.style.transform = 'scale(0.95)';
-    setTimeout(() => {
-      button.style.transform = '';
-    }, 150);
-  }
-}
-
 // Apply translation, rotation, and scale to image wrapper
 function updateTransform() {
   userImgWrapper.style.transform = `translate(${offsetX}px, ${offsetY}px) rotate(${rotation}deg) scale(${scale})`;
 }
-
-// Update width based on input change
-widthInput.addEventListener("change", () => {
-  const val = Math.max(10, Math.min(1000, parseInt(widthInput.value) || 10));
-  userImg.style.width = val + "px";
-  widthInput.value = val;
-  
-  // Re-constrain position after size change
-  const imgHeight = userImg.offsetHeight;
-  const constrained = constrainPosition(offsetX, offsetY, val, imgHeight);
-  offsetX = constrained.x;
-  offsetY = constrained.y;
-  updateTransform();
-});
-
-// Update height based on input change
-heightInput.addEventListener("change", () => {
-  const val = Math.max(10, Math.min(1000, parseInt(heightInput.value) || 10));
-  userImg.style.height = val + "px";
-  heightInput.value = val;
-  
-  // Re-constrain position after size change
-  const imgWidth = userImg.offsetWidth;
-  const constrained = constrainPosition(offsetX, offsetY, imgWidth, val);
-  offsetX = constrained.x;
-  offsetY = constrained.y;
-  updateTransform();
-});
 
 // Enhanced image upload with drag and drop
 upload.addEventListener("change", handleImageUpload);
@@ -251,15 +205,15 @@ function handleImageUpload(e) {
     // Center the image in the container
     const containerWidth = coverContainer.offsetWidth;
     const containerHeight = coverContainer.offsetHeight;
-    const imgWidth = parseInt(widthInput.value);
-    const imgHeight = parseInt(heightInput.value);
+    const imgWidth = 200; // Default width
+    const imgHeight = 280; // Default height
     
     offsetX = (containerWidth - imgWidth) / 2; // Center horizontally
     offsetY = (containerHeight - imgHeight) / 2; // Center vertically
     scale = 1; // Reset scale
     rotation = 0;
-    userImg.style.width = widthInput.value + "px";
-    userImg.style.height = heightInput.value + "px";
+    userImg.style.width = imgWidth + "px";
+    userImg.style.height = imgHeight + "px";
     updateTransform();
     
     // Show success state
@@ -320,22 +274,22 @@ function resizeMouseMove(e) {
   
   switch (currentHandle.className) {
     case "resize-handle br": // Bottom right corner
-      newWidth = Math.max(10, Math.min(1000, startWidth + dx));
-      newHeight = Math.max(10, Math.min(1000, startHeight + dy));
+      newWidth = Math.max(50, Math.min(1000, startWidth + dx));
+      newHeight = Math.max(50, Math.min(1000, startHeight + dy));
       break;
     case "resize-handle bl": // Bottom left
-      newWidth = Math.max(10, Math.min(1000, startWidth - dx));
-      newHeight = Math.max(10, Math.min(1000, startHeight + dy));
+      newWidth = Math.max(50, Math.min(1000, startWidth - dx));
+      newHeight = Math.max(50, Math.min(1000, startHeight + dy));
       newOffsetX = startOffsetX + dx;
       break;
     case "resize-handle tr": // Top right
-      newWidth = Math.max(10, Math.min(1000, startWidth + dx));
-      newHeight = Math.max(10, Math.min(1000, startHeight - dy));
+      newWidth = Math.max(50, Math.min(1000, startWidth + dx));
+      newHeight = Math.max(50, Math.min(1000, startHeight - dy));
       newOffsetY = startOffsetY + dy;
       break;
     case "resize-handle tl": // Top left
-      newWidth = Math.max(10, Math.min(1000, startWidth - dx));
-      newHeight = Math.max(10, Math.min(1000, startHeight - dy));
+      newWidth = Math.max(50, Math.min(1000, startWidth - dx));
+      newHeight = Math.max(50, Math.min(1000, startHeight - dy));
       newOffsetX = startOffsetX + dx;
       newOffsetY = startOffsetY + dy;
       break;
@@ -344,8 +298,6 @@ function resizeMouseMove(e) {
   // Constrain position after resize
   const constrained = constrainPosition(newOffsetX, newOffsetY, newWidth, newHeight);
   
-  widthInput.value = newWidth;
-  heightInput.value = newHeight;
   offsetX = constrained.x;
   offsetY = constrained.y;
   
@@ -363,68 +315,6 @@ function resizeMouseUp() {
   document.removeEventListener("mouseup", resizeMouseUp);
   document.removeEventListener("touchend", resizeMouseUp);
 }
-
-// Increment/decrement width with visual feedback
-function changeWidth(delta) {
-  let val = Math.max(10, Math.min(1000, parseInt(widthInput.value) + delta));
-  widthInput.value = val;
-  userImg.style.width = val + "px";
-  
-  // Re-constrain position after size change
-  const imgHeight = userImg.offsetHeight;
-  const constrained = constrainPosition(offsetX, offsetY, val, imgHeight);
-  offsetX = constrained.x;
-  offsetY = constrained.y;
-  updateTransform();
-  
-  // Add visual feedback
-  const button = event.target.closest('button');
-  if (button) {
-    button.style.transform = 'scale(0.9)';
-    setTimeout(() => {
-      button.style.transform = '';
-    }, 150);
-  }
-}
-
-// Increment/decrement height with visual feedback
-function changeHeight(delta) {
-  let val = Math.max(10, Math.min(1000, parseInt(heightInput.value) + delta));
-  heightInput.value = val;
-  userImg.style.height = val + "px";
-  
-  // Re-constrain position after size change
-  const imgWidth = userImg.offsetWidth;
-  const constrained = constrainPosition(offsetX, offsetY, imgWidth, val);
-  offsetX = constrained.x;
-  offsetY = constrained.y;
-  updateTransform();
-  
-  // Add visual feedback
-  const button = event.target.closest('button');
-  if (button) {
-    button.style.transform = 'scale(0.9)';
-    setTimeout(() => {
-      button.style.transform = '';
-    }, 150);
-  }
-}
-
-// Keyboard shortcuts (desktop only)
-document.addEventListener("keydown", (e) => {
-  if (e.ctrlKey || e.metaKey) {
-    switch (e.key) {
-      case "r":
-        e.preventDefault();
-        rotateImage(10);
-        break;
-      case "l":
-        e.preventDefault();
-        rotateImage(-10);
-        break;
-    }
-  }
-});
 
 // Add smooth cursor for dragging
 userImgWrapper.addEventListener("mouseenter", () => {
