@@ -239,6 +239,16 @@ function handleImageUpload(e) {
     uploadLabel.querySelector("i").className = "fas fa-check-circle";
     uploadLabel.querySelector("span").textContent = "Image uploaded successfully!";
     
+    // Show send button after successful upload
+    const sendBtn = document.getElementById('send-btn');
+    if (sendBtn) {
+      sendBtn.style.display = 'block';
+      sendBtn.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'center' 
+      });
+    }
+    
     // Reset after 2 seconds
     setTimeout(() => {
       uploadLabel.classList.remove("success");
@@ -448,6 +458,9 @@ document.addEventListener("DOMContentLoaded", () => {
     lastTouchEnd = now;
   }, false);
   
+  // Initialize customer form functionality
+  initializeCustomerForm();
+  
   // Debug: Log initial state
   console.log("Initial state:", {
     wrapperHidden: userImgWrapper.hidden,
@@ -457,3 +470,165 @@ document.addEventListener("DOMContentLoaded", () => {
     imageDisplay: userImg.style.display
   });
 });
+
+// Customer form functionality
+function initializeCustomerForm() {
+  const customerForm = document.getElementById('customer-form');
+  if (customerForm) {
+    customerForm.addEventListener('submit', handleFormSubmit);
+  }
+}
+
+// Show customer form
+function showCustomerForm() {
+  const formSection = document.getElementById('customer-form-section');
+  const sendBtn = document.getElementById('send-btn');
+  
+  if (formSection && sendBtn) {
+    formSection.style.display = 'block';
+    sendBtn.style.display = 'none';
+    
+    // Scroll to form
+    formSection.scrollIntoView({ 
+      behavior: 'smooth', 
+      block: 'center' 
+    });
+  }
+}
+
+// Hide customer form
+function hideCustomerForm() {
+  const formSection = document.getElementById('customer-form-section');
+  const sendBtn = document.getElementById('send-btn');
+  
+  if (formSection && sendBtn) {
+    formSection.style.display = 'none';
+    sendBtn.style.display = 'block';
+  }
+}
+
+// Handle form submission
+function handleFormSubmit(e) {
+  e.preventDefault();
+  
+  const formData = new FormData(e.target);
+  const customerName = formData.get('customer-name');
+  const customerPhone = formData.get('customer-phone');
+  const customerAddress = formData.get('customer-address');
+  
+  // Get phone information
+  const phoneData = window.selectedPhoneData || { name: 'Unknown Phone', specs: 'Unknown' };
+  
+  // Create WhatsApp message
+  const message = createWhatsAppMessage(customerName, customerPhone, customerAddress, phoneData);
+  
+  // Send to WhatsApp
+  sendToWhatsApp(message);
+}
+
+// Create WhatsApp message
+function createWhatsAppMessage(name, phone, address, phoneData) {
+  const message = `*COVERF.LB - New Order* 📱
+
+*Customer Information:*
+👤 Name: ${name}
+📞 Phone: ${phone}
+📍 Address: ${address}
+
+*Phone Details:*
+📱 Model: ${phoneData.name}
+📏 Display: ${phoneData.specs}
+
+*Order Details:*
+🎨 Custom cover design
+📸 Image uploaded and positioned
+
+---
+*Order sent from COVERF.LB website*`;
+
+  return encodeURIComponent(message);
+}
+
+// Send to WhatsApp
+function sendToWhatsApp(message) {
+  const whatsappNumber = '+243998189909';
+  const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${message}`;
+  
+  // Open WhatsApp in new tab
+  window.open(whatsappUrl, '_blank');
+  
+  // Show success message
+  showSuccessMessage();
+}
+
+// Show success message
+function showSuccessMessage() {
+  // Create success notification
+  const notification = document.createElement('div');
+  notification.className = 'success-notification';
+  notification.innerHTML = `
+    <div class="notification-content">
+      <i class="fas fa-check-circle"></i>
+      <span>Order sent successfully to WhatsApp!</span>
+    </div>
+  `;
+  
+  // Add styles
+  notification.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: linear-gradient(45deg, #25d366, #128c7e);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(37, 211, 102, 0.3);
+    z-index: 10000;
+    animation: slideInRight 0.5s ease-out;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  `;
+  
+  // Add animation styles
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes slideInRight {
+      from {
+        opacity: 0;
+        transform: translateX(100%);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+  `;
+  document.head.appendChild(style);
+  
+  // Add to page
+  document.body.appendChild(notification);
+  
+  // Remove after 5 seconds
+  setTimeout(() => {
+    notification.style.animation = 'slideOutRight 0.5s ease-out';
+    setTimeout(() => {
+      notification.remove();
+    }, 500);
+  }, 5000);
+  
+  // Add slide out animation
+  const slideOutStyle = document.createElement('style');
+  slideOutStyle.textContent = `
+    @keyframes slideOutRight {
+      from {
+        opacity: 1;
+        transform: translateX(0);
+      }
+      to {
+        opacity: 0;
+        transform: translateX(100%);
+      }
+    }
+  `;
+  document.head.appendChild(slideOutStyle);
+}
