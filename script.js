@@ -613,7 +613,7 @@ function createWhatsAppMessage(name, phone, address, phoneData) {
 
 *Order Details:*
 🎨 Custom cover design
-📸 Image uploaded and positioned
+📸 Customer image attached
 
 ---
 *Order sent from COVERF.LB website*`;
@@ -628,20 +628,55 @@ function sendToWhatsApp(message) {
   // Check if we have image data
   if (window.orderImageData) {
     try {
-      // Create a download link for the image
-      createImageDownload();
+      // Convert base64 to blob for file upload
+      const imageBlob = dataURLtoBlob(window.orderImageData);
       
-          // Add image note to message
-    const imageNote = `\n\n📸 *Original Image:* The original uploaded image has been automatically saved to your device as "original-image-[timestamp].[extension]"`;
-    const fullMessage = message + encodeURIComponent(imageNote);
-      const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${fullMessage}`;
+      // Create a temporary file input
+      const fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.accept = 'image/*';
+      fileInput.style.display = 'none';
       
-      // Open WhatsApp in new tab
-      window.open(whatsappUrl, '_blank');
+      // Create a File object from the blob
+      const file = new File([imageBlob], 'customer-image.jpg', { type: 'image/jpeg' });
       
-      console.log('Image saved and WhatsApp opened with image note');
+      // Create a DataTransfer object and add the file
+      const dataTransfer = new DataTransfer();
+      dataTransfer.items.add(file);
+      fileInput.files = dataTransfer.files;
+      
+      // Add to DOM temporarily
+      document.body.appendChild(fileInput);
+      
+      // Try to send image via WhatsApp Web API (if available)
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        navigator.share({
+          title: 'COVERF.LB - Customer Order',
+          text: message,
+          files: [file]
+        }).then(() => {
+          console.log('Image shared successfully via Web Share API');
+        }).catch((error) => {
+          console.error('Error sharing image:', error);
+          // Fallback to text message
+          const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${message}`;
+          window.open(whatsappUrl, '_blank');
+        });
+      } else {
+        // Fallback: Send text message with image note
+        const imageNote = `\n\n📸 *Customer Image:* The customer's image is ready for printing. Please check the uploaded file.`;
+        const fullMessage = message + encodeURIComponent(imageNote);
+        const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${fullMessage}`;
+        window.open(whatsappUrl, '_blank');
+        
+        console.log('WhatsApp opened with image note (fallback)');
+      }
+      
+      // Clean up
+      document.body.removeChild(fileInput);
+      
     } catch (error) {
-      console.error('Error saving image:', error);
+      console.error('Error sending image:', error);
       
       // Fallback to text-only message
       const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${message}`;
@@ -659,52 +694,22 @@ function sendToWhatsApp(message) {
   showSuccessMessage();
 }
 
-// Create image download
-function createImageDownload() {
-  if (!window.orderImageData) {
-    console.log('No image data to download');
-    return;
+// Convert data URL to Blob
+function dataURLtoBlob(dataURL) {
+  const arr = dataURL.split(',');
+  const mime = arr[0].match(/:(.*?);/)[1];
+  const bstr = atob(arr[1]);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+  
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
   }
   
-  try {
-    // Create download link
-    const link = document.createElement('a');
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    
-    // Determine file extension from the original image
-    let fileExtension = 'png';
-    if (window.orderImageData.includes('data:image/jpeg')) {
-      fileExtension = 'jpg';
-    } else if (window.orderImageData.includes('data:image/webp')) {
-      fileExtension = 'webp';
-    } else if (window.orderImageData.includes('data:image/gif')) {
-      fileExtension = 'gif';
-    }
-    
-    link.download = `original-image-${timestamp}.${fileExtension}`;
-    link.href = window.orderImageData;
-    
-    // Add link to DOM temporarily
-    document.body.appendChild(link);
-    
-    // Trigger download
-    link.click();
-    
-    // Remove link from DOM
-    document.body.removeChild(link);
-    
-    console.log('Original image download triggered:', link.download);
-    
-    // Clear stored image data after a short delay
-    setTimeout(() => {
-      window.orderImageData = null;
-    }, 1000);
-    
-  } catch (error) {
-    console.error('Error creating image download:', error);
-    throw error;
-  }
+  return new Blob([u8arr], { type: mime });
 }
+
+// Note: Image download function removed - images are now sent directly to WhatsApp
 
 // Show success message
 function showSuccessMessage() {
@@ -719,7 +724,7 @@ function showSuccessMessage() {
       <i class="fas fa-check-circle"></i>
       <div>
         <div>Order sent successfully to WhatsApp!</div>
-        ${hasImage ? '<div style="font-size: 12px; margin-top: 5px;">Original image has been saved to your device.</div>' : ''}
+        ${hasImage ? '<div style="font-size: 12px; margin-top: 5px;">Customer image has been sent with the order.</div>' : ''}
       </div>
     </div>
   `;
