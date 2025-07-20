@@ -6,7 +6,7 @@
 
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  direction: rtl;
+  direction: ltr;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   min-height: 100vh;
   user-select: none;
@@ -68,7 +68,7 @@ header.hidden {
 }
 
 .contact-info {
-  text-align: left;
+  text-align: right;
   display: flex;
   gap: 15px;
   order: 1;
@@ -405,6 +405,7 @@ h2 {
     flex-direction: row;
     gap: 8px;
     order: 1;
+    text-align: right;
   }
   
   .contact-info span {

@@ -236,13 +236,13 @@ function handleImageUpload(e) {
     uploadLabel.classList.remove("loading");
     uploadLabel.classList.add("success");
     uploadLabel.querySelector("i").className = "fas fa-check-circle";
-    uploadLabel.querySelector("span").textContent = "تم رفع الصورة بنجاح!";
+    uploadLabel.querySelector("span").textContent = "Image uploaded successfully!";
     
     // Reset after 2 seconds
     setTimeout(() => {
       uploadLabel.classList.remove("success");
       uploadLabel.querySelector("i").className = "fas fa-cloud-upload-alt";
-      uploadLabel.querySelector("span").textContent = "اختر صورة لتصميم الكوفر";
+      uploadLabel.querySelector("span").textContent = "Choose an image to design your cover";
     }, 2000);
     
     // Debug log
@@ -258,7 +258,7 @@ function handleImageUpload(e) {
   reader.onerror = (error) => {
     console.error("Error reading file:", error);
     uploadLabel.classList.remove("loading");
-    uploadLabel.querySelector("span").textContent = "خطأ في قراءة الملف";
+    uploadLabel.querySelector("span").textContent = "Error reading file";
   };
   
   reader.readAsDataURL(file);
@@ -454,74 +454,4 @@ document.addEventListener("DOMContentLoaded", () => {
     imageSrc: userImg.src,
     imageDisplay: userImg.style.display
   });
-});
-
-// Test function to create a sample image (for debugging)
-function createTestImage() {
-  const canvas = document.createElement('canvas');
-  canvas.width = 200;
-  canvas.height = 280;
-  const ctx = canvas.getContext('2d');
-  
-  // Create a gradient background
-  const gradient = ctx.createLinearGradient(0, 0, 200, 280);
-  gradient.addColorStop(0, '#667eea');
-  gradient.addColorStop(1, '#764ba2');
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, 200, 280);
-  
-  // Add text
-  ctx.fillStyle = 'white';
-  ctx.font = '20px Arial';
-  ctx.textAlign = 'center';
-  ctx.fillText('صورة تجريبية', 100, 140);
-  
-  // Convert to data URL
-  const dataURL = canvas.toDataURL('image/png');
-  
-  // Simulate image upload
-  userImg.src = dataURL;
-  userImgWrapper.hidden = false;
-  userImgWrapper.style.display = "block";
-  userImgWrapper.style.visibility = "visible";
-  
-  const containerWidth = coverContainer.offsetWidth;
-  const containerHeight = coverContainer.offsetHeight;
-  const imgWidth = 200;
-  const imgHeight = 280;
-  
-  offsetX = (containerWidth - imgWidth) / 2;
-  offsetY = (containerHeight - imgHeight) / 2;
-  scale = 1;
-  rotation = 0;
-  
-  userImg.style.width = imgWidth + "px";
-  userImg.style.height = imgHeight + "px";
-  userImg.style.display = "block";
-  userImg.style.visibility = "visible";
-  
-  updateTransform();
-  
-  console.log("Test image created and displayed");
-}
-
-// Add test button (temporary for debugging)
-document.addEventListener("DOMContentLoaded", () => {
-  // Add test button
-  const testButton = document.createElement('button');
-  testButton.textContent = 'اختبار الصورة';
-  testButton.style.cssText = `
-    position: fixed;
-    top: 100px;
-    right: 20px;
-    z-index: 10000;
-    padding: 10px 15px;
-    background: #667eea;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  `;
-  testButton.onclick = createTestImage;
-  document.body.appendChild(testButton);
 });
