@@ -587,6 +587,12 @@ function createWhatsAppMessageWithImage(name, phone, address, phoneData, userIma
           // Store the image URL
           window.orderImageUrl = imageUrl;
           
+          // Show the ImgBB link to the user
+          showImgBBLink(imageUrl);
+          
+          // Also display link in a dedicated area on the page
+          displayImgBBLinkOnPage(imageUrl);
+          
           // Create message with image URL
           const message = createWhatsAppMessage(name, phone, address, phoneData);
           
@@ -720,6 +726,290 @@ function dataURLtoBlob(dataURL) {
   }
   
   return new Blob([u8arr], { type: mime });
+}
+
+// Show ImgBB link to user
+function showImgBBLink(imageUrl) {
+  // Create ImgBB link notification
+  const notification = document.createElement('div');
+  notification.className = 'imgbb-notification';
+  
+  notification.innerHTML = `
+    <div class="notification-content">
+      <i class="fas fa-link"></i>
+      <div>
+        <div style="font-weight: 600; margin-bottom: 8px;">Image uploaded to ImgBB</div>
+        <div style="font-size: 12px; margin-bottom: 10px;">Click to copy the link:</div>
+        <div class="imgbb-link" onclick="copyImgBBLink('${imageUrl}')" style="cursor: pointer; background: rgba(255,255,255,0.1); padding: 8px 12px; border-radius: 8px; font-size: 11px; word-break: break-all; border: 1px solid rgba(255,255,255,0.2);">
+          ${imageUrl}
+        </div>
+        <div style="font-size: 10px; margin-top: 5px; opacity: 0.8;">Click to copy</div>
+      </div>
+      <button onclick="this.parentElement.parentElement.remove()" style="background: none; border: none; color: white; font-size: 18px; cursor: pointer; position: absolute; top: 10px; right: 10px;">×</button>
+    </div>
+  `;
+  
+  // Add styles
+  notification.style.cssText = `
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    color: white;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+    z-index: 10000;
+    animation: slideInLeft 0.5s ease-out;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    max-width: 400px;
+    min-width: 300px;
+  `;
+  
+  // Add animation styles
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes slideInLeft {
+      from {
+        opacity: 0;
+        transform: translateX(-100%);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+  `;
+  document.head.appendChild(style);
+  
+  // Add to page
+  document.body.appendChild(notification);
+  
+  // Remove after 30 seconds
+  setTimeout(() => {
+    if (notification.parentElement) {
+      notification.style.animation = 'slideOutLeft 0.5s ease-out';
+      setTimeout(() => {
+        if (notification.parentElement) {
+          notification.remove();
+        }
+      }, 500);
+    }
+  }, 30000);
+  
+  // Add slide out animation
+  const slideOutStyle = document.createElement('style');
+  slideOutStyle.textContent = `
+    @keyframes slideOutLeft {
+      from {
+        opacity: 1;
+        transform: translateX(0);
+      }
+      to {
+        opacity: 0;
+        transform: translateX(-100%);
+      }
+    }
+  `;
+  document.head.appendChild(slideOutStyle);
+}
+
+// Display ImgBB link on the page
+function displayImgBBLinkOnPage(imageUrl) {
+  // Remove existing link display
+  const existingDisplay = document.getElementById('imgbb-link-display');
+  if (existingDisplay) {
+    existingDisplay.remove();
+  }
+  
+  // Create link display area
+  const linkDisplay = document.createElement('div');
+  linkDisplay.id = 'imgbb-link-display';
+  linkDisplay.innerHTML = `
+    <div class="link-display-container">
+      <div class="link-display-header">
+        <i class="fas fa-link"></i>
+        <span>Image uploaded to ImgBB</span>
+      </div>
+      <div class="link-display-content">
+        <div class="link-text" onclick="copyImgBBLink('${imageUrl}')" title="Click to copy">
+          ${imageUrl}
+        </div>
+        <div class="link-actions">
+          <button onclick="copyImgBBLink('${imageUrl}')" class="copy-btn">
+            <i class="fas fa-copy"></i> Copy
+          </button>
+          <button onclick="window.open('${imageUrl}', '_blank')" class="open-btn">
+            <i class="fas fa-external-link-alt"></i> Open
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  // Add styles
+  linkDisplay.style.cssText = `
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    color: white;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+    z-index: 9999;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    max-width: 400px;
+    min-width: 300px;
+    animation: slideInUp 0.5s ease-out;
+  `;
+  
+  // Add internal styles
+  const internalStyle = document.createElement('style');
+  internalStyle.textContent = `
+    .link-display-container {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    .link-display-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 15px;
+      font-weight: 600;
+      font-size: 16px;
+    }
+    
+    .link-display-content {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .link-text {
+      background: rgba(255,255,255,0.1);
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      word-break: break-all;
+      border: 1px solid rgba(255,255,255,0.2);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .link-text:hover {
+      background: rgba(255,255,255,0.2);
+      transform: translateY(-1px);
+    }
+    
+    .link-actions {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .copy-btn, .open-btn {
+      flex: 1;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+    }
+    
+    .copy-btn {
+      background: rgba(255,255,255,0.2);
+      color: white;
+    }
+    
+    .copy-btn:hover {
+      background: rgba(255,255,255,0.3);
+      transform: translateY(-1px);
+    }
+    
+    .open-btn {
+      background: #48bb78;
+      color: white;
+    }
+    
+    .open-btn:hover {
+      background: #38a169;
+      transform: translateY(-1px);
+    }
+    
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(100%);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  `;
+  document.head.appendChild(internalStyle);
+  
+  // Add to page
+  document.body.appendChild(linkDisplay);
+}
+
+// Copy ImgBB link to clipboard
+function copyImgBBLink(url) {
+  navigator.clipboard.writeText(url).then(() => {
+    // Show copy success message
+    const copyNotification = document.createElement('div');
+    copyNotification.innerHTML = `
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <i class="fas fa-check"></i>
+        <span>Link copied to clipboard!</span>
+      </div>
+    `;
+    
+    copyNotification.style.cssText = `
+      position: fixed;
+      top: 80px;
+      left: 20px;
+      background: #48bb78;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 8px;
+      font-size: 12px;
+      z-index: 10001;
+      animation: fadeInOut 2s ease-out;
+    `;
+    
+    const fadeStyle = document.createElement('style');
+    fadeStyle.textContent = `
+      @keyframes fadeInOut {
+        0% { opacity: 0; transform: translateY(-10px); }
+        20% { opacity: 1; transform: translateY(0); }
+        80% { opacity: 1; transform: translateY(0); }
+        100% { opacity: 0; transform: translateY(-10px); }
+      }
+    `;
+    document.head.appendChild(fadeStyle);
+    
+    document.body.appendChild(copyNotification);
+    
+    setTimeout(() => {
+      if (copyNotification.parentElement) {
+        copyNotification.remove();
+      }
+    }, 2000);
+    
+  }).catch(err => {
+    console.error('Failed to copy link:', err);
+    // Fallback: open link in new tab
+    window.open(url, '_blank');
+  });
 }
 
 // Show success message
