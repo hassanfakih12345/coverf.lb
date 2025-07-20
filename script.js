@@ -200,20 +200,32 @@ function handleImageUpload(e) {
   const reader = new FileReader();
   reader.onload = (e) => {
     userImg.src = e.target.result;
+    
+    // Make sure the wrapper is visible
     userImgWrapper.hidden = false;
+    userImgWrapper.style.display = "block";
+    userImgWrapper.style.visibility = "visible";
+    
+    // Set default dimensions
+    const imgWidth = 200;
+    const imgHeight = 280;
     
     // Center the image in the container
     const containerWidth = coverContainer.offsetWidth;
     const containerHeight = coverContainer.offsetHeight;
-    const imgWidth = 200; // Default width
-    const imgHeight = 280; // Default height
     
-    offsetX = (containerWidth - imgWidth) / 2; // Center horizontally
-    offsetY = (containerHeight - imgHeight) / 2; // Center vertically
-    scale = 1; // Reset scale
+    offsetX = (containerWidth - imgWidth) / 2;
+    offsetY = (containerHeight - imgHeight) / 2;
+    scale = 1;
     rotation = 0;
+    
+    // Set image dimensions
     userImg.style.width = imgWidth + "px";
     userImg.style.height = imgHeight + "px";
+    userImg.style.display = "block";
+    userImg.style.visibility = "visible";
+    
+    // Update transform
     updateTransform();
     
     // Show success state
@@ -228,7 +240,23 @@ function handleImageUpload(e) {
       uploadLabel.querySelector("i").className = "fas fa-cloud-upload-alt";
       uploadLabel.querySelector("span").textContent = "اختر صورة لتصميم الكوفر";
     }, 2000);
+    
+    // Debug log
+    console.log("Image loaded successfully:", {
+      src: userImg.src,
+      width: userImg.offsetWidth,
+      height: userImg.offsetHeight,
+      visible: !userImgWrapper.hidden,
+      display: userImgWrapper.style.display
+    });
   };
+  
+  reader.onerror = (error) => {
+    console.error("Error reading file:", error);
+    uploadLabel.classList.remove("loading");
+    uploadLabel.querySelector("span").textContent = "خطأ في قراءة الملف";
+  };
+  
   reader.readAsDataURL(file);
 }
 
@@ -345,6 +373,10 @@ document.addEventListener("DOMContentLoaded", () => {
   // Add some initial animation
   userImgWrapper.style.transition = "transform 0.1s ease-out";
   
+  // Ensure proper initial state
+  userImgWrapper.style.display = "none";
+  userImgWrapper.hidden = true;
+  
   // Add tooltip functionality
   const tooltips = document.querySelectorAll('[title]');
   tooltips.forEach(element => {
@@ -389,4 +421,83 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     lastTouchEnd = now;
   }, false);
+  
+  // Debug: Log initial state
+  console.log("Initial state:", {
+    wrapperHidden: userImgWrapper.hidden,
+    wrapperDisplay: userImgWrapper.style.display,
+    wrapperVisible: userImgWrapper.style.visibility,
+    imageSrc: userImg.src,
+    imageDisplay: userImg.style.display
+  });
+});
+
+// Test function to create a sample image (for debugging)
+function createTestImage() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 200;
+  canvas.height = 280;
+  const ctx = canvas.getContext('2d');
+  
+  // Create a gradient background
+  const gradient = ctx.createLinearGradient(0, 0, 200, 280);
+  gradient.addColorStop(0, '#667eea');
+  gradient.addColorStop(1, '#764ba2');
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, 200, 280);
+  
+  // Add text
+  ctx.fillStyle = 'white';
+  ctx.font = '20px Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText('صورة تجريبية', 100, 140);
+  
+  // Convert to data URL
+  const dataURL = canvas.toDataURL('image/png');
+  
+  // Simulate image upload
+  userImg.src = dataURL;
+  userImgWrapper.hidden = false;
+  userImgWrapper.style.display = "block";
+  userImgWrapper.style.visibility = "visible";
+  
+  const containerWidth = coverContainer.offsetWidth;
+  const containerHeight = coverContainer.offsetHeight;
+  const imgWidth = 200;
+  const imgHeight = 280;
+  
+  offsetX = (containerWidth - imgWidth) / 2;
+  offsetY = (containerHeight - imgHeight) / 2;
+  scale = 1;
+  rotation = 0;
+  
+  userImg.style.width = imgWidth + "px";
+  userImg.style.height = imgHeight + "px";
+  userImg.style.display = "block";
+  userImg.style.visibility = "visible";
+  
+  updateTransform();
+  
+  console.log("Test image created and displayed");
+}
+
+// Add test button (temporary for debugging)
+document.addEventListener("DOMContentLoaded", () => {
+  // Add test button
+  const testButton = document.createElement('button');
+  testButton.textContent = 'اختبار الصورة';
+  testButton.style.cssText = `
+    position: fixed;
+    top: 100px;
+    right: 20px;
+    z-index: 10000;
+    padding: 10px 15px;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  `;
+  testButton.onclick = createTestImage;
+  document.body.appendChild(testButton);
 });
