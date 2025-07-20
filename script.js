@@ -562,10 +562,10 @@ function handleFormSubmit(e) {
     });
 }
 
-// Create WhatsApp message with image
+// Create WhatsApp message with original image
 function createWhatsAppMessageWithImage(name, phone, address, phoneData, userImage) {
   return new Promise((resolve, reject) => {
-    console.log('Creating WhatsApp message with image...');
+    console.log('Creating WhatsApp message with original image...');
     
     // Check if image exists and has src
     if (!userImage || !userImage.src || userImage.src === '') {
@@ -578,99 +578,19 @@ function createWhatsAppMessageWithImage(name, phone, address, phoneData, userIma
     
     console.log('User image found:', userImage.src);
     
-          try {
-        // Create canvas to capture the design
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        
-        // Set canvas size to match container
-        const container = document.getElementById('cover-container');
-        canvas.width = container.offsetWidth;
-        canvas.height = container.offsetHeight;
-        
-        console.log('Canvas created:', {
-          width: canvas.width,
-          height: canvas.height,
-          containerWidth: container.offsetWidth,
-          containerHeight: container.offsetHeight
-        });
+    try {
+      // Store the original image data directly
+      window.orderImageData = userImage.src;
       
-      // Create a temporary image to load the user image
-      const tempImg = new Image();
+      console.log('Original image data stored successfully');
       
-              tempImg.onload = () => {
-          try {
-            console.log('Image loaded successfully, drawing to canvas...');
-            
-            // Draw background
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            // Calculate image position and size
-            const imgX = offsetX + (container.offsetWidth / 2);
-            const imgY = offsetY + (container.offsetHeight / 2);
-            
-            console.log('Image positioning:', {
-              offsetX,
-              offsetY,
-              scale,
-              rotation,
-              imgX,
-              imgY,
-              userImageWidth: userImage.offsetWidth,
-              userImageHeight: userImage.offsetHeight
-            });
-            
-            // Save current context
-            ctx.save();
-            
-            // Apply transformations
-            ctx.translate(imgX, imgY);
-            ctx.rotate(rotation * Math.PI / 180);
-            ctx.scale(scale, scale);
-            
-            // Draw the user image
-            ctx.drawImage(tempImg, -userImage.offsetWidth/2, -userImage.offsetHeight/2, userImage.offsetWidth, userImage.offsetHeight);
-            
-            // Restore context
-            ctx.restore();
-            
-            console.log('Image drawn to canvas, converting to base64...');
-            
-            // Convert canvas to base64
-            const imageData = canvas.toDataURL('image/png', 0.8);
-            
-            console.log('Canvas converted to base64, length:', imageData.length);
-            
-            // Create message with image
-            const message = createWhatsAppMessage(name, phone, address, phoneData);
-            
-            // Store image data for later use
-            window.orderImageData = imageData;
-            
-            console.log('Image data stored successfully');
-            
-            resolve(message);
-          } catch (error) {
-            console.error('Error creating image:', error);
-            // Fallback to text-only message
-            const message = createWhatsAppMessage(name, phone, address, phoneData);
-            resolve(message);
-          }
-        };
+      // Create message
+      const message = createWhatsAppMessage(name, phone, address, phoneData);
       
-      tempImg.onerror = () => {
-        console.error('Error loading user image');
-        // Fallback to text-only message
-        const message = createWhatsAppMessage(name, phone, address, phoneData);
-        resolve(message);
-      };
-      
-      // Set image source
-      tempImg.src = userImage.src;
+      resolve(message);
       
     } catch (error) {
-      console.error('Error in image processing:', error);
+      console.error('Error storing original image:', error);
       // Fallback to text-only message
       const message = createWhatsAppMessage(name, phone, address, phoneData);
       resolve(message);
@@ -711,9 +631,9 @@ function sendToWhatsApp(message) {
       // Create a download link for the image
       createImageDownload();
       
-      // Add image note to message
-      const imageNote = `\n\n📸 *Design Image:* The design image has been automatically saved to your device as "coverf-design-[timestamp].png"`;
-      const fullMessage = message + encodeURIComponent(imageNote);
+          // Add image note to message
+    const imageNote = `\n\n📸 *Original Image:* The original uploaded image has been automatically saved to your device as "original-image-[timestamp].[extension]"`;
+    const fullMessage = message + encodeURIComponent(imageNote);
       const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${fullMessage}`;
       
       // Open WhatsApp in new tab
@@ -750,7 +670,18 @@ function createImageDownload() {
     // Create download link
     const link = document.createElement('a');
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    link.download = `coverf-design-${timestamp}.png`;
+    
+    // Determine file extension from the original image
+    let fileExtension = 'png';
+    if (window.orderImageData.includes('data:image/jpeg')) {
+      fileExtension = 'jpg';
+    } else if (window.orderImageData.includes('data:image/webp')) {
+      fileExtension = 'webp';
+    } else if (window.orderImageData.includes('data:image/gif')) {
+      fileExtension = 'gif';
+    }
+    
+    link.download = `original-image-${timestamp}.${fileExtension}`;
     link.href = window.orderImageData;
     
     // Add link to DOM temporarily
@@ -762,7 +693,7 @@ function createImageDownload() {
     // Remove link from DOM
     document.body.removeChild(link);
     
-    console.log('Image download triggered:', link.download);
+    console.log('Original image download triggered:', link.download);
     
     // Clear stored image data after a short delay
     setTimeout(() => {
@@ -788,7 +719,7 @@ function showSuccessMessage() {
       <i class="fas fa-check-circle"></i>
       <div>
         <div>Order sent successfully to WhatsApp!</div>
-        ${hasImage ? '<div style="font-size: 12px; margin-top: 5px;">Design image has been saved to your device.</div>' : ''}
+        ${hasImage ? '<div style="font-size: 12px; margin-top: 5px;">Original image has been saved to your device.</div>' : ''}
       </div>
     </div>
   `;
