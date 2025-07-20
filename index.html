@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>COVERF.LB - تصميم الكوفر</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+  <header>
+    <div class="logo-area">
+      <img src="https://via.placeholder.com/50x50/667eea/ffffff?text=L" alt="Logo" />
+      <div class="project-name">COVERF.LB</div>
+    </div>
+    <div class="contact-info">
+      <span><i class="fas fa-phone"></i> 81 234 567</span>
+      <span><i class="fab fa-instagram"></i> @coverf.lb</span>
+    </div>
+  </header>
+
+  <div class="main-content">
+    <h2><i class="fas fa-magic"></i> صمّم الكوفر الخاص بك مع أزرار التحكم بالحجم</h2>
+
+    <div class="upload-section">
+      <label for="upload" class="upload-label">
+        <i class="fas fa-cloud-upload-alt"></i>
+        <span>اختر صورة لتصميم الكوفر</span>
+        <small>اضغط هنا أو اسحب الصورة</small>
+      </label>
+      <input type="file" id="upload" accept="image/*" />
+    </div>
+
+    <div id="cover-container">
+      <div id="user-image-wrapper" hidden>
+        <img id="user-image" src="" alt="صورة الزبون" draggable="false" />
+        <div class="resize-handle tl" title="تغيير الحجم من الزاوية العلوية اليسرى"></div>
+        <div class="resize-handle tr" title="تغيير الحجم من الزاوية العلوية اليمنى"></div>
+        <div class="resize-handle bl" title="تغيير الحجم من الزاوية السفلية اليسرى"></div>
+        <div class="resize-handle br" title="تغيير الحجم من الزاوية السفلية اليمنى"></div>
+      </div>
+      <img src="https://raw.githubusercontent.com/hassanfakih12345/coverf.lb/97e899d6d6286a9e9ec61e008ecd0351687042ef/iphone%2011.png" id="template" />
+    </div>
+
+    <div class="controls">
+      <button onclick="rotateImage(10)" title="تدوير لليمين">
+        <i class="fas fa-redo"></i> تدوير لليمين
+      </button>
+      <button onclick="rotateImage(-10)" title="تدوير لليسار">
+        <i class="fas fa-undo"></i> تدوير لليسار
+      </button>
+    </div>
+
+    <div class="dimensions">
+      <div class="dimension-group">
+        <label><i class="fas fa-arrows-alt-h"></i> العرض:</label>
+        <button onclick="changeWidth(-5)" title="تقليل العرض">
+          <i class="fas fa-minus"></i>
+        </button>
+        <input type="number" id="widthInput" value="260" min="10" max="500" />
+        <button onclick="changeWidth(5)" title="زيادة العرض">
+          <i class="fas fa-plus"></i>
+        </button>
+      </div>
+
+      <div class="dimension-group">
+        <label><i class="fas fa-arrows-alt-v"></i> الارتفاع:</label>
+        <button onclick="changeHeight(-5)" title="تقليل الارتفاع">
+          <i class="fas fa-minus"></i>
+        </button>
+        <input type="number" id="heightInput" value="360" min="10" max="700" />
+        <button onclick="changeHeight(5)" title="زيادة الارتفاع">
+          <i class="fas fa-plus"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="instructions">
+      <div class="instruction-card">
+        <i class="fas fa-mouse-pointer"></i>
+        <h3>اسحب الصورة</h3>
+        <p>يمكنك تحريك الصورة بحرية داخل الكوفر</p>
+      </div>
+      <div class="instruction-card">
+        <i class="fas fa-expand-arrows-alt"></i>
+        <h3>غيّر الحجم</h3>
+        <p>استخدم الزوايا أو الأزرار لتغيير حجم الصورة</p>
+      </div>
+      <div class="instruction-card">
+        <i class="fas fa-sync-alt"></i>
+        <h3>دوّر الصورة</h3>
+        <p>استخدم أزرار التدوير لتغيير زاوية الصورة</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
