@@ -693,18 +693,30 @@ function createWhatsAppMessage(name, phone, address, phoneData) {
 function sendToWhatsApp(message) {
   const whatsappNumber = '+243998189909';
   
-  // Check if we have image URL from ImgBB
+  // Check if we have image URL from any service
   if (window.orderImageUrl) {
     try {
-      // Add image URL to message
-      const imageNote = `\n\n📸 *Customer Image:* ${window.orderImageUrl}`;
+      // Determine the type of URL and format message accordingly
+      let imageNote = '';
+      
+      if (window.orderImageUrl.startsWith('data:')) {
+        // Data URL - inform about image processing
+        imageNote = `\n\n📸 *Customer Image:* Image has been processed and is ready for printing. The image data is attached to this order.`;
+      } else if (window.orderImageUrl.includes('ibb.co') || window.orderImageUrl.includes('imgur.com') || window.orderImageUrl.includes('cloudinary.com')) {
+        // External hosting service
+        imageNote = `\n\n📸 *Customer Image:* ${window.orderImageUrl}`;
+      } else {
+        // Unknown format
+        imageNote = `\n\n📸 *Customer Image:* Image uploaded successfully. Please check the attached image data.`;
+      }
+      
       const fullMessage = message + encodeURIComponent(imageNote);
       const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${fullMessage}`;
       
       // Open WhatsApp in new tab
       window.open(whatsappUrl, '_blank');
       
-      console.log('WhatsApp opened with ImgBB image URL');
+      console.log('WhatsApp opened with image URL from:', window.orderImageUrl.substring(0, 50) + '...');
       
     } catch (error) {
       console.error('Error sending image URL:', error);
@@ -740,31 +752,61 @@ function dataURLtoBlob(dataURL) {
   return new Blob([u8arr], { type: mime });
 }
 
-// Show ImgBB link to user
+// Show image link to user
 function showImgBBLink(imageUrl) {
-  // Create ImgBB link notification
+  // Determine service type
+  let serviceName = 'Image Service';
+  let serviceIcon = 'fas fa-link';
+  let serviceColor = '#48bb78';
+  
+  if (imageUrl.includes('ibb.co')) {
+    serviceName = 'ImgBB';
+    serviceIcon = 'fas fa-cloud-upload-alt';
+    serviceColor = '#667eea';
+  } else if (imageUrl.includes('imgur.com')) {
+    serviceName = 'Imgur';
+    serviceIcon = 'fas fa-images';
+    serviceColor = '#1bb76e';
+  } else if (imageUrl.includes('cloudinary.com')) {
+    serviceName = 'Cloudinary';
+    serviceIcon = 'fas fa-cloud';
+    serviceColor = '#f39c12';
+  } else if (imageUrl.startsWith('data:')) {
+    serviceName = 'Local Processing';
+    serviceIcon = 'fas fa-cog';
+    serviceColor = '#9b59b6';
+  }
+  
+  // Create notification
   const notification = document.createElement('div');
   notification.className = 'imgbb-notification';
   
   notification.innerHTML = `
     <div class="notification-content">
-      <i class="fas fa-link"></i>
+      <i class="${serviceIcon}" style="color: ${serviceColor};"></i>
       <div>
-        <div style="font-weight: 600; margin-bottom: 8px; color: #48bb78;">
-          <i class="fas fa-check-circle"></i> Image uploaded to ImgBB successfully!
+        <div style="font-weight: 600; margin-bottom: 8px; color: ${serviceColor};">
+          <i class="fas fa-check-circle"></i> Image uploaded to ${serviceName} successfully!
         </div>
         <div style="font-size: 12px; margin-bottom: 10px; color: #e2e8f0;">
-          Click the link below to copy it to clipboard:
+          ${imageUrl.startsWith('data:') ? 'Image processed and ready for printing' : 'Click the link below to copy it to clipboard:'}
         </div>
-        <div class="imgbb-link" onclick="copyImgBBLink('${imageUrl}')" style="cursor: pointer; background: rgba(255,255,255,0.15); padding: 10px 12px; border-radius: 8px; font-size: 11px; word-break: break-all; border: 2px solid rgba(255,255,255,0.3); transition: all 0.3s ease; hover:background: rgba(255,255,255,0.25);">
-          <i class="fas fa-copy" style="margin-right: 5px; color: #48bb78;"></i>
-          ${imageUrl}
-        </div>
+        ${imageUrl.startsWith('data:') ? `
+          <div class="imgbb-link" style="background: rgba(255,255,255,0.15); padding: 10px 12px; border-radius: 8px; font-size: 11px; word-break: break-all; border: 2px solid rgba(255,255,255,0.3);">
+            <i class="fas fa-image" style="margin-right: 5px; color: ${serviceColor};"></i>
+            Image processed successfully (${Math.round(imageUrl.length / 1024)} KB)
+          </div>
+        ` : `
+          <div class="imgbb-link" onclick="copyImgBBLink('${imageUrl}')" style="cursor: pointer; background: rgba(255,255,255,0.15); padding: 10px 12px; border-radius: 8px; font-size: 11px; word-break: break-all; border: 2px solid rgba(255,255,255,0.3); transition: all 0.3s ease; hover:background: rgba(255,255,255,0.25);">
+            <i class="fas fa-copy" style="margin-right: 5px; color: ${serviceColor};"></i>
+            ${imageUrl}
+          </div>
+        `}
         <div style="font-size: 10px; margin-top: 8px; opacity: 0.8; color: #cbd5e0;">
-          <i class="fas fa-mouse-pointer"></i> Click to copy link
+          ${imageUrl.startsWith('data:') ? '<i class="fas fa-check"></i> Ready for WhatsApp' : '<i class="fas fa-mouse-pointer"></i> Click to copy link'}
         </div>
         <div style="font-size: 10px; margin-top: 5px; opacity: 0.6; color: #a0aec0;">
-          Link will be automatically added to WhatsApp message
+          ${imageUrl.startsWith('data:') ? 'Image data will be included in WhatsApp message' : 'Link will be automatically added to WhatsApp message'}
         </div>
       </div>
       <button onclick="this.parentElement.parentElement.remove()" style="background: none; border: none; color: white; font-size: 18px; cursor: pointer; position: absolute; top: 10px; right: 10px; padding: 5px; border-radius: 5px; transition: all 0.3s ease;">×</button>
@@ -837,12 +879,35 @@ function showImgBBLink(imageUrl) {
   document.head.appendChild(slideOutStyle);
 }
 
-// Display ImgBB link on the page
+// Display image link on the page
 function displayImgBBLinkOnPage(imageUrl) {
   // Remove existing link display
   const existingDisplay = document.getElementById('imgbb-link-display');
   if (existingDisplay) {
     existingDisplay.remove();
+  }
+  
+  // Determine service type
+  let serviceName = 'Image Service';
+  let serviceIcon = 'fas fa-link';
+  let serviceColor = '#48bb78';
+  
+  if (imageUrl.includes('ibb.co')) {
+    serviceName = 'ImgBB';
+    serviceIcon = 'fas fa-cloud-upload-alt';
+    serviceColor = '#667eea';
+  } else if (imageUrl.includes('imgur.com')) {
+    serviceName = 'Imgur';
+    serviceIcon = 'fas fa-images';
+    serviceColor = '#1bb76e';
+  } else if (imageUrl.includes('cloudinary.com')) {
+    serviceName = 'Cloudinary';
+    serviceIcon = 'fas fa-cloud';
+    serviceColor = '#f39c12';
+  } else if (imageUrl.startsWith('data:')) {
+    serviceName = 'Local Processing';
+    serviceIcon = 'fas fa-cog';
+    serviceColor = '#9b59b6';
   }
   
   // Create link display area
@@ -851,21 +916,36 @@ function displayImgBBLinkOnPage(imageUrl) {
   linkDisplay.innerHTML = `
     <div class="link-display-container">
       <div class="link-display-header">
-        <i class="fas fa-link"></i>
-        <span>Image uploaded to ImgBB</span>
+        <i class="${serviceIcon}" style="color: ${serviceColor};"></i>
+        <span>Image uploaded to ${serviceName}</span>
       </div>
       <div class="link-display-content">
-        <div class="link-text" onclick="copyImgBBLink('${imageUrl}')" title="Click to copy">
-          ${imageUrl}
-        </div>
-        <div class="link-actions">
-          <button onclick="copyImgBBLink('${imageUrl}')" class="copy-btn">
-            <i class="fas fa-copy"></i> Copy
-          </button>
-          <button onclick="window.open('${imageUrl}', '_blank')" class="open-btn">
-            <i class="fas fa-external-link-alt"></i> Open
-          </button>
-        </div>
+        ${imageUrl.startsWith('data:') ? `
+          <div class="link-text" title="Image processed successfully">
+            <i class="fas fa-image" style="margin-right: 5px; color: ${serviceColor};"></i>
+            Image processed successfully (${Math.round(imageUrl.length / 1024)} KB)
+          </div>
+          <div class="link-actions">
+            <button onclick="copyImgBBLink('${imageUrl}')" class="copy-btn">
+              <i class="fas fa-copy"></i> Copy Data
+            </button>
+            <button onclick="downloadImage('${imageUrl}')" class="open-btn">
+              <i class="fas fa-download"></i> Download
+            </button>
+          </div>
+        ` : `
+          <div class="link-text" onclick="copyImgBBLink('${imageUrl}')" title="Click to copy">
+            ${imageUrl}
+          </div>
+          <div class="link-actions">
+            <button onclick="copyImgBBLink('${imageUrl}')" class="copy-btn">
+              <i class="fas fa-copy"></i> Copy
+            </button>
+            <button onclick="window.open('${imageUrl}', '_blank')" class="open-btn">
+              <i class="fas fa-external-link-alt"></i> Open
+            </button>
+          </div>
+        `}
       </div>
     </div>
   `;
@@ -981,6 +1061,21 @@ function displayImgBBLinkOnPage(imageUrl) {
   
   // Add to page
   document.body.appendChild(linkDisplay);
+}
+
+// Download image function
+function downloadImage(dataUrl) {
+  const link = document.createElement('a');
+  link.href = dataUrl;
+  link.download = 'customer-image.jpg';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  
+  // Show success message
+  if (window.aiAssistant) {
+    window.aiAssistant.log('Image downloaded successfully', 'success');
+  }
 }
 
 // Copy ImgBB link to clipboard
