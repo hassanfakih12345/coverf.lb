@@ -6,30 +6,62 @@ const userImg = document.getElementById("user-image");
 const widthInput = document.getElementById("widthInput");
 const heightInput = document.getElementById("heightInput");
 const coverContainer = document.getElementById("cover-container");
+const header = document.querySelector("header");
+
+// Header scroll functionality
+let lastScrollTop = 0;
+let scrollThreshold = 10;
+
+window.addEventListener("scroll", () => {
+  const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+  
+  if (Math.abs(scrollTop - lastScrollTop) > scrollThreshold) {
+    if (scrollTop > lastScrollTop && scrollTop > 100) {
+      // Scrolling down - hide header
+      header.classList.add("hidden");
+    } else {
+      // Scrolling up - show header
+      header.classList.remove("hidden");
+    }
+    lastScrollTop = scrollTop;
+  }
+});
 
 // Initial state variables
 let rotation = 0;
 let offsetX = 0,
   offsetY = 0;
+let scale = 1;
 let isDragging = false;
 let dragStartX, dragStartY;
 
-// Get container boundaries
+// Pinch-to-zoom variables
+let initialDistance = 0;
+let initialScale = 1;
+let isPinching = false;
+
+// Get container boundaries based on screen size
 function getContainerBounds() {
   const containerRect = coverContainer.getBoundingClientRect();
+  const screenWidth = window.innerWidth;
+  const screenHeight = window.innerHeight;
+  
+  // Allow movement across full screen width
   return {
-    minX: 0,
-    maxX: containerRect.width,
-    minY: 0,
-    maxY: containerRect.height
+    minX: -screenWidth * 0.5,
+    maxX: screenWidth * 0.5,
+    minY: -screenHeight * 0.3,
+    maxY: screenHeight * 0.3
   };
 }
 
 // Constrain position within container bounds
 function constrainPosition(x, y, width, height) {
   const bounds = getContainerBounds();
-  const maxX = bounds.maxX - width;
-  const maxY = bounds.maxY - height;
+  const scaledWidth = width * scale;
+  const scaledHeight = height * scale;
+  const maxX = bounds.maxX - scaledWidth;
+  const maxY = bounds.maxY - scaledHeight;
   
   return {
     x: Math.max(bounds.minX, Math.min(maxX, x)),
@@ -51,6 +83,13 @@ function getClientCoordinates(e) {
   };
 }
 
+// Calculate distance between two touch points
+function getDistance(touch1, touch2) {
+  const dx = touch1.clientX - touch2.clientX;
+  const dy = touch1.clientY - touch2.clientY;
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
 // Enable dragging image container (mouse and touch)
 userImgWrapper.addEventListener("mousedown", startDrag);
 userImgWrapper.addEventListener("touchstart", startDrag, { passive: false });
@@ -58,6 +97,15 @@ userImgWrapper.addEventListener("touchstart", startDrag, { passive: false });
 function startDrag(e) {
   // Prevent dragging if clicking on a resize handle
   if (e.target.classList.contains("resize-handle")) return;
+  
+  // Handle pinch-to-zoom
+  if (e.touches && e.touches.length === 2) {
+    isPinching = true;
+    initialDistance = getDistance(e.touches[0], e.touches[1]);
+    initialScale = scale;
+    e.preventDefault();
+    return;
+  }
   
   isDragging = true;
   const coords = getClientCoordinates(e);
@@ -73,6 +121,7 @@ document.addEventListener("touchend", stopDrag);
 
 function stopDrag() {
   isDragging = false;
+  isPinching = false;
   userImgWrapper.style.cursor = "grab";
 }
 
@@ -81,6 +130,18 @@ document.addEventListener("mousemove", updateDrag);
 document.addEventListener("touchmove", updateDrag, { passive: false });
 
 function updateDrag(e) {
+  if (isPinching && e.touches && e.touches.length === 2) {
+    // Handle pinch-to-zoom
+    const currentDistance = getDistance(e.touches[0], e.touches[1]);
+    const scaleFactor = currentDistance / initialDistance;
+    const newScale = Math.max(0.1, Math.min(5, initialScale * scaleFactor));
+    
+    scale = newScale;
+    updateTransform();
+    e.preventDefault();
+    return;
+  }
+  
   if (!isDragging) return;
   
   const coords = getClientCoordinates(e);
@@ -113,14 +174,14 @@ function rotateImage(deg) {
   }
 }
 
-// Apply translation and rotation to image wrapper
+// Apply translation, rotation, and scale to image wrapper
 function updateTransform() {
-  userImgWrapper.style.transform = `translate(${offsetX}px, ${offsetY}px) rotate(${rotation}deg)`;
+  userImgWrapper.style.transform = `translate(${offsetX}px, ${offsetY}px) rotate(${rotation}deg) scale(${scale})`;
 }
 
 // Update width based on input change
 widthInput.addEventListener("change", () => {
-  const val = Math.max(10, Math.min(500, parseInt(widthInput.value) || 10));
+  const val = Math.max(10, Math.min(1000, parseInt(widthInput.value) || 10));
   userImg.style.width = val + "px";
   widthInput.value = val;
   
@@ -134,7 +195,7 @@ widthInput.addEventListener("change", () => {
 
 // Update height based on input change
 heightInput.addEventListener("change", () => {
-  const val = Math.max(10, Math.min(700, parseInt(heightInput.value) || 10));
+  const val = Math.max(10, Math.min(1000, parseInt(heightInput.value) || 10));
   userImg.style.height = val + "px";
   heightInput.value = val;
   
@@ -195,7 +256,7 @@ function handleImageUpload(e) {
     
     offsetX = (containerWidth - imgWidth) / 2; // Center horizontally
     offsetY = (containerHeight - imgHeight) / 2; // Center vertically
-    
+    scale = 1; // Reset scale
     rotation = 0;
     userImg.style.width = widthInput.value + "px";
     userImg.style.height = heightInput.value + "px";
@@ -259,22 +320,22 @@ function resizeMouseMove(e) {
   
   switch (currentHandle.className) {
     case "resize-handle br": // Bottom right corner
-      newWidth = Math.max(10, Math.min(500, startWidth + dx));
-      newHeight = Math.max(10, Math.min(700, startHeight + dy));
+      newWidth = Math.max(10, Math.min(1000, startWidth + dx));
+      newHeight = Math.max(10, Math.min(1000, startHeight + dy));
       break;
     case "resize-handle bl": // Bottom left
-      newWidth = Math.max(10, Math.min(500, startWidth - dx));
-      newHeight = Math.max(10, Math.min(700, startHeight + dy));
+      newWidth = Math.max(10, Math.min(1000, startWidth - dx));
+      newHeight = Math.max(10, Math.min(1000, startHeight + dy));
       newOffsetX = startOffsetX + dx;
       break;
     case "resize-handle tr": // Top right
-      newWidth = Math.max(10, Math.min(500, startWidth + dx));
-      newHeight = Math.max(10, Math.min(700, startHeight - dy));
+      newWidth = Math.max(10, Math.min(1000, startWidth + dx));
+      newHeight = Math.max(10, Math.min(1000, startHeight - dy));
       newOffsetY = startOffsetY + dy;
       break;
     case "resize-handle tl": // Top left
-      newWidth = Math.max(10, Math.min(500, startWidth - dx));
-      newHeight = Math.max(10, Math.min(700, startHeight - dy));
+      newWidth = Math.max(10, Math.min(1000, startWidth - dx));
+      newHeight = Math.max(10, Math.min(1000, startHeight - dy));
       newOffsetX = startOffsetX + dx;
       newOffsetY = startOffsetY + dy;
       break;
@@ -305,7 +366,7 @@ function resizeMouseUp() {
 
 // Increment/decrement width with visual feedback
 function changeWidth(delta) {
-  let val = Math.max(10, Math.min(500, parseInt(widthInput.value) + delta));
+  let val = Math.max(10, Math.min(1000, parseInt(widthInput.value) + delta));
   widthInput.value = val;
   userImg.style.width = val + "px";
   
@@ -328,7 +389,7 @@ function changeWidth(delta) {
 
 // Increment/decrement height with visual feedback
 function changeHeight(delta) {
-  let val = Math.max(10, Math.min(700, parseInt(heightInput.value) + delta));
+  let val = Math.max(10, Math.min(1000, parseInt(heightInput.value) + delta));
   heightInput.value = val;
   userImg.style.height = val + "px";
   
@@ -376,6 +437,17 @@ userImgWrapper.addEventListener("mouseleave", () => {
   if (!isDragging) {
     userImgWrapper.style.cursor = "default";
   }
+});
+
+// Handle window resize
+window.addEventListener("resize", () => {
+  // Re-constrain position when window is resized
+  const imgWidth = userImg.offsetWidth;
+  const imgHeight = userImg.offsetHeight;
+  const constrained = constrainPosition(offsetX, offsetY, imgWidth, imgHeight);
+  offsetX = constrained.x;
+  offsetY = constrained.y;
+  updateTransform();
 });
 
 // Initialize with some default styling
