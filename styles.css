@@ -626,3 +626,63 @@ html {
         font-size: 0.8rem;
     }
 }
+/* Mobile compact header (<= 768px): صف واحد/سطرين وبأقل ارتفاع ممكن */
+@media (max-width: 768px) {
+    .header { padding: 0.5rem 0; }
+    @media (max-width: 768px) {
+        .hero { margin-top: 56px; } /* بدل 80px */
+      }
+      @media (max-width: 480px) {
+        .hero { margin-top: 50px; }
+      }
+       
+    .header .container {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;     /* يحافظ على التوازن إذا ضاق العرض */
+      gap: 0.5rem;                 /* تقليل المسافات */
+      flex-wrap: wrap;             /* يسمح بالنزول لسطرين عند اللزوم */
+    }
+  
+    .logo { font-size: 1.2rem; gap: 0.3rem; }
+    .logo-image { width: 30px; height: 30px; }
+  
+    .language-switcher { order: 2; display: flex; gap: 0.4rem; }
+    .lang-btn {
+      padding: 0.3rem 0.6rem;
+      font-size: 0.8rem;
+      border-width: 1.5px;
+    }
+  
+    .contact-info {
+      order: 3;            /* تنزل تحت إذا المكان ضاق */
+      width: 100%;         /* تاخد العرض كله كسطر ثاني عند الحاجة */
+      display: flex;
+      justify-content: center;
+    }
+  
+    .social-links { gap: 0.5rem; flex-direction: row; }
+    .social-links a {
+      padding: 0.3rem 0.5rem;
+      font-size: 0.85rem;
+    }
+  
+    .social-links i { font-size: 1rem; }
+  }
+/* Ultra-compact header (<= 480px) */
+@media (max-width: 480px) {
+    /* عرض أيقونات فقط في السوشال */
+    .social-links .contact-text { display: none; }
+  
+    /* تقليل الفراغات أكثر */
+    .header .container { gap: 0.35rem; }
+    .social-links { gap: 0.35rem; }
+    .social-links a { padding: 0.25rem 0.4rem; }
+  
+    .logo { font-size: 1.05rem; }
+    .logo-image { width: 26px; height: 26px; }
+  
+    .lang-btn { font-size: 0.75rem; padding: 0.25rem 0.5rem; }
+  }
+    
