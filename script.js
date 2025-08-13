@@ -619,18 +619,19 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
-    const heroSection = document.querySelector('.hero');
+    const heroContent = document.querySelector('.hero-content');
     
     window.addEventListener('scroll', () => {
         if (window.scrollY > 50) { 
-            // يخفي القسم عند النزول أكثر من 50px
-            heroSection.style.display = 'none';
+            heroContent.style.opacity = '0';
+            heroContent.style.pointerEvents = 'none';
         } else {
-            // يرجع يظهره إذا رجعت فوق
-            heroSection.style.display = 'flex';
+            heroContent.style.opacity = '1';
+            heroContent.style.pointerEvents = 'auto';
         }
     });
 });
+
 
 
     // Add hover effects to product cards
@@ -657,7 +658,6 @@ document.addEventListener('DOMContentLoaded', () => {
             ripple.remove();
         }, 600);
     });
-});
 
 // Add ripple effect styles
 const rippleStyles = document.createElement('style');

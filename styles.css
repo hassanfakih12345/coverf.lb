@@ -685,4 +685,6 @@ html {
   
     .lang-btn { font-size: 0.75rem; padding: 0.25rem 0.5rem; }
   }
-    
+  .hero-content {
+    transition: opacity 0.5s ease;
+}
