@@ -69,12 +69,16 @@ body {
     color: var(--primary-color);
 }
 
-.logo i {
-    font-size: 2rem;
-    background: var(--bg-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+.logo-image {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    border-radius: 8px;
+    transition: var(--transition);
+}
+
+.logo-image:hover {
+    transform: scale(1.1);
 }
 
 .contact-info {
@@ -104,6 +108,21 @@ body {
     color: var(--primary-color);
     background: rgba(99, 102, 241, 0.1);
     transform: translateY(-2px);
+}
+
+.instagram-link:hover {
+    color: #e4405f !important;
+    background: rgba(228, 64, 95, 0.1) !important;
+}
+
+.tiktok-link:hover {
+    color: #000000 !important;
+    background: rgba(0, 0, 0, 0.1) !important;
+}
+
+.whatsapp-link:hover {
+    color: #25d366 !important;
+    background: rgba(37, 211, 102, 0.1) !important;
 }
 
 .social-links i {
@@ -386,6 +405,18 @@ body {
 .social-icons a:hover {
     background: var(--primary-color);
     transform: translateY(-2px);
+}
+
+.social-icons a[title="Instagram"]:hover {
+    background: #e4405f;
+}
+
+.social-icons a[title="TikTok"]:hover {
+    background: #000000;
+}
+
+.social-icons a[title="WhatsApp"]:hover {
+    background: #25d366;
 }
 
 .footer-bottom {

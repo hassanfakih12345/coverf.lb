@@ -3,55 +3,69 @@ class LanguageManager {
     constructor() {
         this.currentLang = 'en';
         this.translations = {
-            en: {
-                'logo-text': 'Modern Store',
-                'contact-text': 'Instagram',
-                'whatsapp-text': 'WhatsApp',
+                         en: {
+                 'logo-text': 'COVERF.LB',
+                 'contact-text': 'Instagram',
+                 'tiktok-text': 'TikTok',
+                 'whatsapp-text': 'WhatsApp',
                 'hero-title': 'Discover Amazing Products',
                 'hero-subtitle': 'Explore our collection of premium products for 2025',
                 'section-title': 'Our Products',
                 'view-details': 'View Details',
-                'product-1-name': 'Premium Wireless Headphones',
-                'product-1-desc': 'High-quality wireless headphones with noise cancellation',
-                'product-2-name': 'Smart Watch Pro',
-                'product-2-desc': 'Advanced smartwatch with health monitoring features',
-                'product-3-name': 'Ultra Comfort Sneakers',
-                'product-3-desc': 'Premium comfort sneakers for everyday wear',
-                'product-4-name': 'Wireless Charging Pad',
-                'product-4-desc': 'Fast wireless charging pad for all devices',
-                'product-5-name': 'Portable Bluetooth Speaker',
-                'product-5-desc': 'Waterproof portable speaker with amazing sound',
-                'product-6-name': 'Premium Sunglasses',
-                'product-6-desc': 'Stylish sunglasses with UV protection',
+                'product-1-name': 'Model of the shrine of Sayyid Hassan',
+                'product-1-desc': 'Exquisite handcrafted statue with artistic design',
+                'product-2-name': 'Wooden board (all sizes)',
+                'product-2-desc': 'High-quality wooden boards available in all sizes',
+                'product-3-name': 'Custom Image and Phrase (Large Size)',
+                'product-3-desc': 'Personalized custom images with phrases in large size',
+                'product-4-name': 'Custom phone case',
+                'product-4-desc': 'Personalized custom phone cases for all models',
+                'product-5-name': 'Custom keychain',
+                'product-5-desc': 'Personalized custom keychains with unique designs',
+                'product-6-name': 'Custom headband',
+                'product-6-desc': 'Personalized custom headbands with unique designs',
+                'product-7-name': 'Custom airpods case',
+                'product-7-desc': 'Personalized custom airpods cases with unique designs',
+                'product-8-name': 'Custom passport holder',
+                'product-8-desc': 'Personalized custom passport holders with unique designs',
+                'product-9-name': 'Custom printed pin',
+                'product-9-desc': 'Personalized custom printed pins with unique designs',
                 'footer-title-1': 'Contact Us',
                 'footer-text-1': 'Get in touch with us for any inquiries',
                 'footer-title-2': 'Follow Us',
-                'copyright': '© 2025 Modern Store. All rights reserved.'
+                'copyright': '© 2025 COVERF.LB. All rights reserved.'
             },
-            ar: {
-                'logo-text': 'المتجر العصري',
-                'contact-text': 'انستغرام',
-                'whatsapp-text': 'واتساب',
+                         ar: {
+                 'logo-text': 'COVERF.LB',
+                 'contact-text': 'انستغرام',
+                 'tiktok-text': 'تيكتوك',
+                 'whatsapp-text': 'واتساب',
                 'hero-title': 'اكتشف منتجات رائعة',
                 'hero-subtitle': 'استكشف مجموعتنا من المنتجات المميزة لعام ٢٠٢٥',
                 'section-title': 'منتجاتنا',
                 'view-details': 'عرض التفاصيل',
-                'product-1-name': 'سماعات لاسلكية مميزة',
-                'product-1-desc': 'سماعات لاسلكية عالية الجودة مع إلغاء الضوضاء',
-                'product-2-name': 'ساعة ذكية برو',
-                'product-2-desc': 'ساعة ذكية متقدمة مع ميزات مراقبة الصحة',
-                'product-3-name': 'أحذية رياضية فائقة الراحة',
-                'product-3-desc': 'أحذية رياضية مريحة للارتداء اليومي',
-                'product-4-name': 'وسادة شحن لاسلكية',
-                'product-4-desc': 'وسادة شحن لاسلكية سريعة لجميع الأجهزة',
-                'product-5-name': 'مكبر صوت بلوتوث محمول',
-                'product-5-desc': 'مكبر صوت محمول مقاوم للماء مع صوت رائع',
-                'product-6-name': 'نظارات شمسية مميزة',
-                'product-6-desc': 'نظارات شمسية أنيقة مع حماية من الأشعة فوق البنفسجية',
+                'product-1-name': 'مجسم ضريح السيد حسن',
+                'product-1-desc': 'مجسم يدوي الصنع بتصميم فني رائع',
+                'product-2-name': 'لوحة خشبية (جميع المقاسات)',
+                'product-2-desc': 'لوحات خشبية عالية الجودة متوفرة بجميع المقاسات',
+                'product-3-name': 'صورة وعبارة مخصصة (مقاس كبير)',
+                'product-3-desc': 'صور مخصصة مع عبارات بمقاس كبير',
+                'product-4-name': 'كوفر هاتف مخصص',
+                'product-4-desc': 'كوفرات هواتف مخصصة لجميع الموديلات',
+                'product-5-name': 'تعليقة مخصصة',
+                'product-5-desc': 'تعليقات مخصصة بتصاميم فريدة',
+                'product-6-name': 'عصابة راس مخصصة',
+                'product-6-desc': 'عصابات راس مخصصة بتصاميم فريدة',
+                'product-7-name': 'بيت سماعة مخصص',
+                'product-7-desc': 'بيوت سماعات مخصصة بتصاميم فريدة',
+                'product-8-name': 'حافظة باسبور مخصصة',
+                'product-8-desc': 'حافظات باسبور مخصصة بتصاميم فريدة',
+                'product-9-name': 'دبوس مطبوع مخصص',
+                'product-9-desc': 'دبابيس مطبوعة مخصصة بتصاميم فريدة',
                 'footer-title-1': 'اتصل بنا',
                 'footer-text-1': 'تواصل معنا لأي استفسارات',
                 'footer-title-2': 'تابعنا',
-                'copyright': '© ٢٠٢٥ المتجر العصري. جميع الحقوق محفوظة.'
+                'copyright': '© ٢٠٢٥ COVERF.LB. جميع الحقوق محفوظة.'
             }
         };
         this.init();
@@ -98,13 +112,161 @@ class LanguageManager {
     }
 
     updateTranslations() {
+        // Update elements with data attributes
         const elements = document.querySelectorAll('[data-en][data-ar]');
         elements.forEach(element => {
-            const translation = this.translations[this.currentLang][element.dataset[this.currentLang]];
-            if (translation) {
-                element.textContent = translation;
+            const key = element.dataset[this.currentLang];
+            if (key && this.translations[this.currentLang][key]) {
+                element.textContent = this.translations[this.currentLang][key];
             }
         });
+        
+        // Update product names specifically
+        this.updateProductNames();
+        
+        // Update modal content if it exists
+        this.updateModalTranslations();
+        
+        // Update WhatsApp message language
+        this.updateWhatsAppMessage();
+    }
+    
+    updateProductNames() {
+        // Update product names using the data attributes
+        const productNames = document.querySelectorAll('.product-name[data-en][data-ar]');
+        productNames.forEach((element, index) => {
+            const productNumber = index + 1;
+            const translationKey = `product-${productNumber}-name`;
+            if (this.translations[this.currentLang][translationKey]) {
+                element.textContent = this.translations[this.currentLang][translationKey];
+            }
+        });
+        
+        // Update product descriptions
+        const productDescriptions = document.querySelectorAll('.product-description[data-en][data-ar]');
+        productDescriptions.forEach((element, index) => {
+            const productNumber = index + 1;
+            const translationKey = `product-${productNumber}-desc`;
+            if (this.translations[this.currentLang][translationKey]) {
+                element.textContent = this.translations[this.currentLang][translationKey];
+            }
+        });
+        
+        // Update product prices
+        const productPrices = document.querySelectorAll('.price[data-en][data-ar]');
+        productPrices.forEach((element) => {
+            const key = element.dataset[this.currentLang];
+            if (key) {
+                element.textContent = key;
+            }
+        });
+        
+        // Update view details buttons
+        const viewDetailsButtons = document.querySelectorAll('.view-details-btn[data-en][data-ar]');
+        viewDetailsButtons.forEach((element) => {
+            const key = element.dataset[this.currentLang];
+            if (key) {
+                element.textContent = key;
+            }
+        });
+        
+        // Update hero section
+        const heroTitle = document.querySelector('.hero-title[data-en][data-ar]');
+        if (heroTitle) {
+            const key = heroTitle.dataset[this.currentLang];
+            if (key) {
+                heroTitle.textContent = key;
+            }
+        }
+        
+        const heroSubtitle = document.querySelector('.hero-subtitle[data-en][data-ar]');
+        if (heroSubtitle) {
+            const key = heroSubtitle.dataset[this.currentLang];
+            if (key) {
+                heroSubtitle.textContent = key;
+            }
+        }
+        
+        // Update section title
+        const sectionTitle = document.querySelector('.section-title[data-en][data-ar]');
+        if (sectionTitle) {
+            const key = sectionTitle.dataset[this.currentLang];
+            if (key) {
+                sectionTitle.textContent = key;
+            }
+        }
+        
+        // Update footer elements
+        const footerTitles = document.querySelectorAll('.footer-title[data-en][data-ar]');
+        footerTitles.forEach((element) => {
+            const key = element.dataset[this.currentLang];
+            if (key) {
+                element.textContent = key;
+            }
+        });
+        
+        const footerTexts = document.querySelectorAll('.footer-text[data-en][data-ar]');
+        footerTexts.forEach((element) => {
+            const key = element.dataset[this.currentLang];
+            if (key) {
+                element.textContent = key;
+            }
+        });
+        
+        const copyright = document.querySelector('.copyright[data-en][data-ar]');
+        if (copyright) {
+            const key = copyright.dataset[this.currentLang];
+            if (key) {
+                copyright.textContent = key;
+            }
+        }
+        
+        // Update header contact links
+        const contactTexts = document.querySelectorAll('.contact-text[data-en][data-ar]');
+        contactTexts.forEach((element) => {
+            const key = element.dataset[this.currentLang];
+            if (key) {
+                element.textContent = key;
+            }
+        });
+    }
+    
+    updateWhatsAppMessage() {
+        // Update any WhatsApp links to use the correct language
+        const whatsappLinks = document.querySelectorAll('a[href*="wa.me"]');
+        whatsappLinks.forEach(link => {
+            const currentText = link.textContent.trim();
+            if (currentText.includes('WhatsApp') || currentText.includes('واتساب')) {
+                link.innerHTML = `<i class="fab fa-whatsapp"></i> <span class="contact-text" data-en="WhatsApp" data-ar="واتساب">${this.translations[this.currentLang]['whatsapp-text']}</span>`;
+            }
+        });
+    }
+    
+    updateModalTranslations() {
+        const modal = document.querySelector('.product-modal');
+        if (modal) {
+            const modalTitle = modal.querySelector('h2');
+            const modalDesc = modal.querySelector('p');
+            const modalBtn = modal.querySelector('.modal-whatsapp-btn');
+            
+            if (modalTitle && modalTitle.textContent) {
+                // Find the product name in translations
+                for (let i = 1; i <= 9; i++) {
+                    const productName = this.translations[this.currentLang][`product-${i}-name`];
+                    if (productName && modalTitle.textContent.includes(productName) || 
+                        this.translations[this.currentLang === 'en' ? 'ar' : 'en'][`product-${i}-name`] && 
+                        modalTitle.textContent.includes(this.translations[this.currentLang === 'en' ? 'ar' : 'en'][`product-${i}-name`])) {
+                        modalTitle.textContent = productName;
+                        modalDesc.textContent = this.translations[this.currentLang][`product-${i}-desc`];
+                        break;
+                    }
+                }
+            }
+            
+            if (modalBtn) {
+                modalBtn.innerHTML = `<i class="fab fa-whatsapp"></i> ${this.currentLang === 'ar' ? 'اطلب عبر واتساب' : 'Order via WhatsApp'}`;
+            }
+        }
     }
 }
 
@@ -196,6 +358,10 @@ class ProductManager {
         const productDesc = productCard.querySelector('.product-description').textContent;
         const productPrice = productCard.querySelector('.price').textContent;
         const productImage = productCard.querySelector('img').src;
+        
+        // Get current language
+        const currentLang = document.documentElement.lang || 'en';
+        const orderText = currentLang === 'ar' ? 'اطلب عبر واتساب' : 'Order via WhatsApp';
 
         // Create modal
         const modal = document.createElement('div');
@@ -214,7 +380,7 @@ class ProductManager {
                             <div class="modal-price">${productPrice}</div>
                             <button class="modal-whatsapp-btn">
                                 <i class="fab fa-whatsapp"></i>
-                                Order via WhatsApp
+                                ${orderText}
                             </button>
                         </div>
                     </div>
@@ -239,8 +405,10 @@ class ProductManager {
         });
 
         modal.querySelector('.modal-whatsapp-btn').addEventListener('click', () => {
-            const message = `Hi! I'm interested in ${productName} (${productPrice})`;
-            const whatsappUrl = `https://wa.me/1234567890?text=${encodeURIComponent(message)}`;
+            const currentLang = document.documentElement.lang || 'en';
+            const greeting = currentLang === 'ar' ? 'مرحباً! أنا مهتم بـ' : 'Hi! I\'m interested in';
+            const message = `${greeting} ${productName} (${productPrice})`;
+            const whatsappUrl = `https://wa.me/96176896910?text=${encodeURIComponent(message)}`;
             window.open(whatsappUrl, '_blank');
         });
 
@@ -248,6 +416,9 @@ class ProductManager {
         setTimeout(() => {
             modal.classList.add('show');
         }, 10);
+        
+        // Store modal reference for language updates
+        this.currentModal = modal;
     }
 
     addModalStyles() {
@@ -432,9 +603,12 @@ class PerformanceOptimizer {
     }
 }
 
+// Global language manager instance
+let languageManager;
+
 // Initialize everything when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    new LanguageManager();
+    languageManager = new LanguageManager();
     new AnimationManager();
     new ProductManager();
     new SmoothScroller();
