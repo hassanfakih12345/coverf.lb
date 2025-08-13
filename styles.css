@@ -589,3 +589,40 @@ html {
     opacity: 1;
     transform: translateY(0);
 }
+/* Extra small devices (phones under 360px) */
+@media (max-width: 360px) {
+    .hero-title {
+        font-size: 1.6rem;
+    }
+
+    .hero-subtitle {
+        font-size: 0.9rem;
+    }
+
+    .product-image {
+        height: 200px;
+    }
+
+    .product-name {
+        font-size: 1rem;
+    }
+
+    .price {
+        font-size: 1rem;
+    }
+
+    .view-details-btn {
+        padding: 0.7rem 1.2rem;
+        font-size: 0.9rem;
+    }
+
+    .logo-image {
+        width: 32px;
+        height: 32px;
+    }
+
+    .lang-btn {
+        padding: 0.3rem 0.7rem;
+        font-size: 0.8rem;
+    }
+}
