@@ -618,16 +618,20 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.classList.add('loaded');
 });
 
-// Add some interactive effects
 document.addEventListener('DOMContentLoaded', () => {
-    // Parallax effect for hero section
+    const heroSection = document.querySelector('.hero');
+    
     window.addEventListener('scroll', () => {
-        const scrolled = window.pageYOffset;
-        const hero = document.querySelector('.hero');
-        if (hero) {
-            hero.style.transform = `translateY(${scrolled * 0.5}px)`;
+        if (window.scrollY > 50) { 
+            // يخفي القسم عند النزول أكثر من 50px
+            heroSection.style.display = 'none';
+        } else {
+            // يرجع يظهره إذا رجعت فوق
+            heroSection.style.display = 'flex';
         }
     });
+});
+
 
     // Add hover effects to product cards
     const productCards = document.querySelectorAll('.product-card');
